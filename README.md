@@ -1,5 +1,5 @@
 # rrze-xliff
-Export und Import von WordPress Content zu und vom XLIFF Format.
+Export und Import von WordPress Content zu und vom [XLIFF (Version 2)](http://docs.oasis-open.org/xliff/xliff-core/v2.0/os/xliff-core-v2.0-os.html) Format.
 
 Status dieses Plugins: **In Planung.**
 
