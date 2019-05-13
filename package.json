@@ -1,0 +1,23 @@
+{
+  "name": "xliff-export",
+  "version": "0.1.0",
+  "description": "Ermöglicht Export und Import von XLIFF-Dateien.",
+  "main": "index.js",
+  "scripts": {
+    "build": "wp-scripts build",
+	"start": "wp-scripts start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RRZE-Webteam/rrze-xliff.git"
+  },
+  "author": "RRZE-Webteam",
+  "license": "GPL-2.0",
+  "bugs": {
+    "url": "https://github.com/RRZE-Webteam/rrze-xliff/issues"
+  },
+  "homepage": "https://github.com/RRZE-Webteam/rrze-xliff#readme",
+  "devDependencies": {
+    "@wordpress/scripts": "^3.1.0"
+  }
+}
