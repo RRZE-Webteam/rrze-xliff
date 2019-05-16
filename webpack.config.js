@@ -5,6 +5,7 @@ module.exports = {
   ...defaultConfig,
   entry: {
 	'block-editor-functions': path.resolve( process.cwd(), 'assets/src/js', 'block-editor-functions.js' ),
+	'bulk-export-functions': path.resolve( process.cwd(), 'assets/src/js', 'bulk-export-functions.js' ),
   },
   output: {
 	filename: '[name].js',

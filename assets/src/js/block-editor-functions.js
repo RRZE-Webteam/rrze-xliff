@@ -12,7 +12,7 @@ const { withState } = wp.compose;
 const { __ } = wp.i18n;
 const { Fragment } = wp.element;
 
-registerPlugin( 'rrzn-xliff', {
+registerPlugin( 'rrze-xliff', {
     render: () => {
         const currentUrl = window.location;
         const postId = new URL(currentUrl).searchParams.get('post');
@@ -22,10 +22,10 @@ registerPlugin( 'rrzn-xliff', {
             emailAddress: '',
         } )( ( { isOpen, emailAddress, setState } ) => (
             <Fragment>
-                <Button isTertiary onClick={ () => setState( { isOpen: true } ) }>{ __( 'Export', 'rrzn-xliff' ) }</Button>
+                <Button isTertiary onClick={ () => setState( { isOpen: true } ) }>{ __( 'Export', 'rrze-xliff' ) }</Button>
                 { isOpen && (
                     <Modal
-                        title={ __( 'Export post as XLIFF', 'rrzn-xliff' ) }
+                        title={ __( 'Export post as XLIFF', 'rrze-xliff' ) }
                         onRequestClose={ () => setState( { isOpen: false } ) }
                     >
                         <p>
@@ -33,21 +33,21 @@ registerPlugin( 'rrzn-xliff', {
                                 href={ xliffExportUrl }
                                 isDefault={ true }
                             >
-                                { __( 'Download XLIFF file', 'rrzn-xliff' ) }
+                                { __( 'Download XLIFF file', 'rrze-xliff' ) }
                             </Button>
                         </p>
-                        <p><strong>{ __( 'Or send the file to an email address:', 'rrzn-xliff' ) }</strong></p>
+                        <p><strong>{ __( 'Or send the file to an email address:', 'rrze-xliff' ) }</strong></p>
                         <TextControl
-                            label={ __( 'Email address', 'rrzn-xliff' ) }
+                            label={ __( 'Email address', 'rrze-xliff' ) }
                             value={ emailAddress }
                             onChange={ ( emailAddress ) => setState( { emailAddress } ) }
                         />
                         <p>
                             <Button
-                                href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&email_adress=${emailAddress}`}
+                                href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&email_address=${emailAddress}`}
                                 isDefault={ true }
                             >
-                                { __( 'Send XLIFF file', 'rrzn-xliff' ) }
+                                { __( 'Send XLIFF file', 'rrze-xliff' ) }
                             </Button>
                         </p>
                     </Modal>
@@ -56,10 +56,10 @@ registerPlugin( 'rrzn-xliff', {
         ) );
         return (
             <PluginPostStatusInfo
-                className="rrzn-xliff-export-and-import"
+                className="rrze-xliff-export-and-import"
             >
                 <div>
-                { __( 'XLIFF:', 'rrzn-xliff' ) } <ExportModal/>
+                { __( 'XLIFF:', 'rrze-xliff' ) } <ExportModal/>
                 </div>
             </PluginPostStatusInfo>
         )

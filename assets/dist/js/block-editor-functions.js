@@ -95,7 +95,7 @@ var _wp$components = wp.components,
 var withState = wp.compose.withState;
 var __ = wp.i18n.__;
 var Fragment = wp.element.Fragment;
-registerPlugin('rrzn-xliff', {
+registerPlugin('rrze-xliff', {
   render: function render() {
     var currentUrl = window.location;
     var postId = new URL(currentUrl).searchParams.get('post');
@@ -114,8 +114,8 @@ registerPlugin('rrzn-xliff', {
             isOpen: true
           });
         }
-      }, __('Export', 'rrzn-xliff')), isOpen && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Modal, {
-        title: __('Export post as XLIFF', 'rrzn-xliff'),
+      }, __('Export', 'rrze-xliff')), isOpen && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Modal, {
+        title: __('Export post as XLIFF', 'rrze-xliff'),
         onRequestClose: function onRequestClose() {
           return setState({
             isOpen: false
@@ -124,8 +124,8 @@ registerPlugin('rrzn-xliff', {
       }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Button, {
         href: xliffExportUrl,
         isDefault: true
-      }, __('Download XLIFF file', 'rrzn-xliff'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("strong", null, __('Or send the file to an email address:', 'rrzn-xliff'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(TextControl, {
-        label: __('Email address', 'rrzn-xliff'),
+      }, __('Download XLIFF file', 'rrze-xliff'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("strong", null, __('Or send the file to an email address:', 'rrze-xliff'))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(TextControl, {
+        label: __('Email address', 'rrze-xliff'),
         value: emailAddress,
         onChange: function onChange(emailAddress) {
           return setState({
@@ -133,13 +133,13 @@ registerPlugin('rrzn-xliff', {
           });
         }
       }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("p", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(Button, {
-        href: "".concat(currentUrl.protocol, "//").concat(currentUrl.host).concat(currentUrl.pathname, "?xliff-export=").concat(postId, "&email_adress=").concat(emailAddress),
+        href: "".concat(currentUrl.protocol, "//").concat(currentUrl.host).concat(currentUrl.pathname, "?xliff-export=").concat(postId, "&email_address=").concat(emailAddress),
         isDefault: true
-      }, __('Send XLIFF file', 'rrzn-xliff')))));
+      }, __('Send XLIFF file', 'rrze-xliff')))));
     });
     return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(PluginPostStatusInfo, {
-      className: "rrzn-xliff-export-and-import"
-    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, __('XLIFF:', 'rrzn-xliff'), " ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(ExportModal, null)));
+      className: "rrze-xliff-export-and-import"
+    }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, __('XLIFF:', 'rrze-xliff'), " ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(ExportModal, null)));
   }
 });
 
