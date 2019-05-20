@@ -17,6 +17,7 @@ class Main
 
 		new Settings();
 		new Export();
+		new Import();
     }
 
     /**
