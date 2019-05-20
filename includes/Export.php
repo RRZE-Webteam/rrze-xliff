@@ -7,13 +7,14 @@ class Export
     protected $xliff_files = [];
 
     /**
-     * Initialisierung des Exports.
+     * Initialisierung des Exporters.
      */
     public function __construct()
     {
         add_filter('bulk_actions-edit-post', [$this, 'bulk_export_action']);
         add_filter('handle_bulk_actions-edit-post', [$this, 'bulk_export_handler'], 10, 3);
         add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
+        add_action('add_meta_boxes', [$this, 'meta_box']);
 
         /**
          * @todo Check if user is allowed to export.
@@ -25,8 +26,8 @@ class Export
                 echo $xliff_file->get_error_message();
                 wp_die();
             }
-            if (isset($_GET['email_address'])) {
-                $this->send_xliff_download($_GET['email_address']);
+            if (isset($_GET['xliff_export_email_address'])) {
+                $this->send_xliff_download($_GET['xliff_export_email_address']);
             } else {
                 $this->send_xliff_download();
             }
@@ -34,7 +35,7 @@ class Export
     }
     
     /**
-     * Bulk-Action für Mehrfachimport einfügen.
+     * Bulk-Action für Mehrfachexport einfügen.
      */
     public function bulk_export_action(array $bulk_actions)
     {
@@ -270,9 +271,64 @@ class Export
     }
     
     /**
+     * Metaboxen registrieren.
+     */
+    public function meta_box()
+    {
+        add_meta_box(
+            'rrze_xliff_export',
+            __('XLIFF export', 'rrze-xliff'),
+            [$this, 'the_export_meta_box'],
+            ['post', 'page'], // @todo: Beitragstypen dynamisch aus Settings holen.
+            'side',
+            'low'
+        );
+    }
+
+    /**
+     * Ausgabe der Metabox für den XLIFF-Export.
+     *
+     * @param object $post Post object.
+     */
+    public function the_export_meta_box(object $post)
+    {
+        printf(
+            '<p><a href="%s" class="button">%s</a></p>
+            <p><strong>%s</strong></p>
+            <p>
+                <label style="display: block" for="xliff_export_email_address">%s</label>
+                <input type="email" value="%s" id="xliff_export_email_address" name="xliff_export_email_address">
+            </p>
+            <p><a href="%s" class="button" id="xliff-export-email-address-link">%s</a></p>',
+            trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
+            __('Download XLIFF file', 'rrze-xliff'),
+            __('Or send the file to an email address:', 'rrze-xliff'),
+            __('Email address', 'rrze-xliff'),
+            '', // @todo: Hier die E-Mail-Adresse aus den Einstellungen einfügen.
+            trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
+            __('Send XLIFF file', 'rrze-xliff')
+        );
+
+        printf(
+            '<script>
+            (function(){
+                document.querySelector("#xliff_export_email_address").addEventListener("blur", function(e) {
+                    var currentUrl = window.location,
+                        exportLink = document.querySelector("#xliff-export-email-address-link"),
+                        exportUrl = currentUrl.protocol + "//" + currentUrl.host + currentUrl.pathname + "?xliff-export=%s&xliff_export_email_address=" + e.target.value;
+
+                    exportLink.setAttribute("href", exportUrl);
+                });
+            })();
+            </script>',
+            $post->ID
+        );
+    }
+    
+    /**
      * Einbinden des Skripts für den Bulk-Export.
      */
-    public function enqueue_bulk_export_script($hook_suffix)
+    public function enqueue_bulk_export_script()
     {
         global $current_screen;
         if ($current_screen->id === 'edit-post') {
