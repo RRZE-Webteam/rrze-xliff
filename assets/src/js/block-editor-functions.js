@@ -42,7 +42,7 @@ registerPlugin( 'rrze-xliff', {
                         />
                         <p>
                             <Button
-                                href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&email_address=${emailAddress}`}
+                                href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&xliff_export_email_address=${emailAddress}`}
                                 isDefault={ true }
                             >
                                 {__('Send XLIFF file', 'rrze-xliff')}
@@ -95,6 +95,12 @@ registerPlugin( 'rrze-xliff', {
                                                 }
                                             }
                                         }
+
+                                        /**
+                                         * @todo: darum kümmern, dass auch Meta-Daten, Beschreibungen von Bildern 
+                                         * et cetera importiert werden. Würde ich dann als Liste in einen Code-Block packen 
+                                         * oder so.
+                                         */
                                     }
                                 }
                             }
@@ -106,7 +112,8 @@ registerPlugin( 'rrze-xliff', {
                     // Das HTML des Beitragsinhalts aus der XLIFF-Datei in Blöcke parsen.
                     content = wp.blocks.parse(content);
 
-                    // Die alten Blöcke aus dem Editor löschen.
+					// Die alten Blöcke aus dem Editor löschen.
+					// @link https://wordpress.stackexchange.com/a/305935.
                     wp.data.dispatch( 'core/editor' ).resetBlocks([]);
 
                     // Content-Blöcke einfügen und Titel aktualisieren.
