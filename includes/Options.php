@@ -19,7 +19,9 @@ class Options
     protected static function default_options()
     {
         $options = [
-            'rrze_xliff_field_1' => '',
+			'rrze_xliff_export_email_address' => '',
+			'rrze_xliff_export_email_subject' => 'XLIFF-Export',
+			'rrze_xliff_export_role' => 'editor'
             // Hier können weitere Felder ('key' => 'value') angelegt werden.
         ];
 
