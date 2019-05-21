@@ -152,10 +152,28 @@ class Settings
      */
     public function options_validate($input)
     {
-        /**
-         * @todo: Die Einstellungen validieren.
-         */
-        //$input['rrze_xliff_text'] = !empty($input['rrze_xliff_export_email_address']) ? $input['rrze_xliff_export_email_address'] : '';
+        // Prüfen, ob keine Post-Types angehakt sind und dann den Standard nehmen.
+        if (! isset($input['rrze_xliff_export_import_post_types'])) {
+            $input['rrze_xliff_export_import_post_types'] = Options::get_default_options()->rrze_xliff_export_import_post_types;
+        } else {
+            // Prüfen, ob die Post-Types gültig sind.
+            foreach ($input['rrze_xliff_export_import_post_types'] as $index => $post_type) {
+                if (get_post_type_object($post_type) === null) {
+                    unset($input['rrze_xliff_export_import_post_types'][$index]);
+                }
+            }
+
+            if (empty($input['rrze_xliff_export_import_post_types'])) {
+                $input['rrze_xliff_export_import_post_types'] = Options::get_default_options()->rrze_xliff_export_import_post_types;
+            }
+        }
+        
+        // Prüfen, ob die Benutzerrolle gültig ist.
+        $selected_role = $input['rrze_xliff[rrze_xliff_export_import_role]'];
+        if (get_role($selected_role) === null) {
+            $input['rrze_xliff[rrze_xliff_export_import_role]'] = Options::get_default_options()->rrze_xliff_export_import_role;
+        }
+
         return $input;
     }
     
