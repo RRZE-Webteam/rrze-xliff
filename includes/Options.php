@@ -19,11 +19,10 @@ class Options
     protected static function default_options()
     {
         $options = [
-			'rrze_xliff_export_email_address' => '',
-			'rrze_xliff_export_email_subject' => 'XLIFF-Export',
-			'rrze_xliff_export_import_role' => 'editor',
-			'rrze_xliff_export_import_post_types' => ['post', 'page'],
-            // Hier können weitere Felder ('key' => 'value') angelegt werden.
+            'rrze_xliff_export_email_address' => '',
+            'rrze_xliff_export_email_subject' => 'XLIFF-Export',
+            'rrze_xliff_export_import_role' => 'editor',
+            'rrze_xliff_export_import_post_types' => ['post', 'page'],
         ];
 
         return $options;
@@ -41,6 +40,17 @@ class Options
         $options = wp_parse_args($options, $defaults);
         $options = array_intersect_key($options, $defaults);
 
+        return (object) $options;
+    }
+
+    /**
+     * Gibt die Standardeinstellungen.
+     * @return object
+     */
+    public static function get_default_options()
+    {
+        $options = self::default_options();
+        
         return (object) $options;
     }
 

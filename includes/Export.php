@@ -5,33 +5,38 @@ namespace RRZE\XLIFF;
 class Export
 {
     protected $xliff_files = [];
+    
+    protected $helpers;
 
     /**
      * Initialisierung des Exporters.
      */
     public function __construct()
-    {
-        add_filter('bulk_actions-edit-post', [$this, 'bulk_export_action']);
-        add_filter('handle_bulk_actions-edit-post', [$this, 'bulk_export_handler'], 10, 3);
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
-        add_action('add_meta_boxes', [$this, 'meta_box']);
-
-        /**
-         * @todo Check if user is allowed to export.
-         */
-        if (is_admin() && isset($_GET['xliff-export']) && absint($_GET['xliff-export'])) {
-            // XLIFF-String holen.
-            $xliff_file = $this->get_xliff_file($_GET['xliff-export']);
-            if (is_wp_error($xliff_file)) {
-                echo $xliff_file->get_error_message();
-                wp_die();
+    {		
+        $this->helpers = new Helpers();
+        
+        add_action('admin_init', function() {
+            $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
+            foreach ($post_types as $post_type) {
+                add_filter("bulk_actions-edit-$post_type", [$this, 'bulk_export_action']);
+                add_filter("handle_bulk_actions-edit-$post_type", [$this, 'bulk_export_handler'], 10, 3);
             }
-            if (isset($_GET['xliff_export_email_address'])) {
-                $this->send_xliff_download($_GET['xliff_export_email_address']);
-            } else {
-                $this->send_xliff_download();
+            add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
+            add_action('add_meta_boxes', [$this, 'meta_box']);
+            if ($this->helpers->is_user_capable() && isset($_GET['xliff-export']) && absint($_GET['xliff-export'])) {
+                // XLIFF-String holen.
+                $xliff_file = $this->get_xliff_file($_GET['xliff-export']);
+                if (is_wp_error($xliff_file)) {
+                    echo $xliff_file->get_error_message();
+                    wp_die();
+                }
+                if (isset($_GET['xliff_export_email_address'])) {
+                    $this->send_xliff_download($_GET['xliff_export_email_address']);
+                } else {
+                    $this->send_xliff_download();
+                }
             }
-        }
+        });
     }
     
     /**
@@ -39,7 +44,9 @@ class Export
      */
     public function bulk_export_action(array $bulk_actions)
     {
-        $bulk_actions['xliff_bulk_export'] = __('Bulk XLIFF export', 'rrze-xliff');
+        if ($this->helpers->is_user_capable()) {
+            $bulk_actions['xliff_bulk_export'] = __('Bulk XLIFF export', 'rrze-xliff');
+        }
         return $bulk_actions;
     }
 
@@ -48,7 +55,7 @@ class Export
      */
     public function bulk_export_handler(string $redirect_to, string $doaction, array $post_ids): string
     {
-        if ($doaction !== 'xliff_bulk_export') {
+        if ($doaction !== 'xliff_bulk_export' || $this->helpers->is_user_capable() === false) {
             return $redirect_to;
         }
         foreach ($post_ids as $post_id) {
@@ -111,7 +118,9 @@ class Export
             }
         } else {
             $to = $email;
-            $subject = __('XLIFF-Export', 'rrze-xliff');
+            $subject = Options::get_options()->rrze_xliff_export_email_subject;
+            // @todo: Platzhalter ersetzen.
+
             $body = __('Here comes the email export', 'rrze-xliff');
             $headers = ['Content-Type: text/html; charset=UTF-8'];
             
@@ -275,14 +284,16 @@ class Export
      */
     public function meta_box()
     {
-        add_meta_box(
-            'rrze_xliff_export',
-            __('XLIFF export', 'rrze-xliff'),
-            [$this, 'the_export_meta_box'],
-            ['post', 'page'], // @todo: Beitragstypen dynamisch aus Settings holen.
-            'side',
-            'low'
-        );
+        if ($this->helpers->is_user_capable()) {
+            add_meta_box(
+                'rrze_xliff_export',
+                __('XLIFF export', 'rrze-xliff'),
+                [$this, 'the_export_meta_box'],
+                Options::get_options()->rrze_xliff_export_import_post_types,
+                'side',
+                'low'
+            );
+        }
     }
 
     /**
@@ -304,7 +315,7 @@ class Export
             __('Download XLIFF file', 'rrze-xliff'),
             __('Or send the file to an email address:', 'rrze-xliff'),
             __('Email address', 'rrze-xliff'),
-            '', // @todo: Hier die E-Mail-Adresse aus den Einstellungen einfügen.
+            Options::get_options()->rrze_xliff_export_email_address,
             trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
             __('Send XLIFF file', 'rrze-xliff')
         );
@@ -330,9 +341,15 @@ class Export
      */
     public function enqueue_bulk_export_script()
     {
-        global $current_screen;
-        if ($current_screen->id === 'edit-post') {
-            wp_enqueue_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
+        if ($this->helpers->is_user_capable()) {
+            global $current_screen;
+            $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
+            foreach ($post_types as $post_type) {
+                if ($current_screen->id === "edit-$post_type") {
+                    wp_enqueue_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
+                    break;
+                }
+            }
         }
     }
 }

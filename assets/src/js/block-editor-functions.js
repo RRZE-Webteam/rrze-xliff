@@ -112,8 +112,8 @@ registerPlugin( 'rrze-xliff', {
                     // Das HTML des Beitragsinhalts aus der XLIFF-Datei in Blöcke parsen.
                     content = wp.blocks.parse(content);
 
-					// Die alten Blöcke aus dem Editor löschen.
-					// @link https://wordpress.stackexchange.com/a/305935.
+                    // Die alten Blöcke aus dem Editor löschen.
+                    // @link https://wordpress.stackexchange.com/a/305935.
                     wp.data.dispatch( 'core/editor' ).resetBlocks([]);
 
                     // Content-Blöcke einfügen und Titel aktualisieren.

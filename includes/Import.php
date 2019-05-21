@@ -5,12 +5,15 @@ namespace RRZE\XLIFF;
 class Import
 {
     protected $xliff_files = [];
+    
+    protected $helpers;
 
     /**
      * Initialisierung des Importers.
      */
     public function __construct()
     {
+        $this->helpers = new Helpers();
         add_action('add_meta_boxes', [$this, 'meta_box']);
         add_action('save_post', [$this, 'save_post']);
         add_action('post_edit_form_tag', [$this, 'update_edit_form']);
@@ -21,14 +24,16 @@ class Import
      */
     public function meta_box()
     {
-        add_meta_box(
-            'rrze_xliff_import',
-            __('XLIFF import', 'rrze-xliff'),
-            [$this, 'the_import_meta_box'],
-            ['post', 'page'], // @todo: Beitragstypen dynamisch aus Settings holen.
-            'side',
-            'low'
-        );
+        if ($this->helpers->is_user_capable()) {
+            add_meta_box(
+                'rrze_xliff_import',
+                __('XLIFF import', 'rrze-xliff'),
+                [$this, 'the_import_meta_box'],
+                Options::get_options()->rrze_xliff_export_import_post_types,
+                'side',
+                'low'
+            );
+        }
     }
 
     /**
@@ -53,7 +58,8 @@ class Import
     /**
      * Import anstoßen.
      */
-    public function save_post(int $post_id) {
+    public function save_post(int $post_id)
+    {
         // Nonce prüfen.
         if (!isset($_POST['rrze_xliff_file_import_nonce']) || !\wp_verify_nonce($_POST['rrze_xliff_file_import_nonce'], plugin_basename(__FILE__))) {
             return;
@@ -64,7 +70,10 @@ class Import
             return;
         }
 
-        // @todo: Auf Berechtigung prüfen.
+        // Auf Berechtigung prüfen.
+        if ($this->helpers->is_user_capable() === false) {
+            return;
+        }
 
         if (isset($_FILES['xliff_import_file'])) {
             remove_action('save_post', [$this, 'save_post']);
