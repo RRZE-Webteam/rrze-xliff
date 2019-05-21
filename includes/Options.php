@@ -21,7 +21,8 @@ class Options
         $options = [
 			'rrze_xliff_export_email_address' => '',
 			'rrze_xliff_export_email_subject' => 'XLIFF-Export',
-			'rrze_xliff_export_role' => 'editor'
+			'rrze_xliff_export_import_role' => 'editor',
+			'rrze_xliff_export_import_post_types' => ['post', 'page'],
             // Hier können weitere Felder ('key' => 'value') angelegt werden.
         ];
 

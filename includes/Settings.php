@@ -108,7 +108,7 @@ class Settings
 
         add_settings_field(
             'rrze_xliff_export_email_subject',
-            __('Default email address', 'rrze-xliff'),
+            __('Default email subject', 'rrze-xliff'),
             [$this, 'rrze_xliff_export_email_subject'],
             'rrze_xliff_options',
             'rrze_xliff_section_export',
@@ -117,23 +117,31 @@ class Settings
                 'description' => __('You can use the following template tags: %%POST_ID%%, %%POST_TITLE%%, %%TARGET_LANGUAGE%%')
             ]
         );
-
-        add_settings_field(
-            'rrze_xliff_export_role',
-            __('Role that a user needs for export', 'rrze-xliff'),
-            [$this, 'rrze_xliff_export_role'],
-            'rrze_xliff_options',
-            'rrze_xliff_section_export',
-            [
-                'label_for' => sprintf('%s[rrze_xliff_export_role]', $this->option_name),
-            ]
-        );
         
         add_settings_section(
             'rrze_xliff_section_general',
             false,
             [$this, 'rrze_xliff_section_general'],
             'rrze_xliff_options'
+        );
+
+        add_settings_field(
+            'rrze_xliff_export_import_role',
+            __('Role that a user needs for export and import', 'rrze-xliff'),
+            [$this, 'rrze_xliff_export_import_role'],
+            'rrze_xliff_options',
+            'rrze_xliff_section_general',
+            [
+                'label_for' => sprintf('%s[rrze_xliff_export_import_role]', $this->option_name),
+            ]
+        );
+
+        add_settings_field(
+            'rrze_xliff_export_import_post_types',
+            __('Post types to show import/export options for', 'rrze-xliff'),
+            [$this, 'rrze_xliff_export_import_post_types'],
+            'rrze_xliff_options',
+            'rrze_xliff_section_general'
         );
     }
 
@@ -144,7 +152,10 @@ class Settings
      */
     public function options_validate($input)
     {
-        $input['rrze_xliff_text'] = !empty($input['rrze_xliff_export_email_address']) ? $input['rrze_xliff_export_email_address'] : '';
+        /**
+         * @todo: Die Einstellungen validieren.
+         */
+        //$input['rrze_xliff_text'] = !empty($input['rrze_xliff_export_email_address']) ? $input['rrze_xliff_export_email_address'] : '';
         return $input;
     }
     
@@ -184,28 +195,6 @@ class Settings
             <?php
         }
     }
-
-    /**
-     * Feld für Export-Rolle.
-     */
-    public function rrze_xliff_export_role()
-    {
-        $roles = get_editable_roles();
-        $role_option_elements = '';
-        foreach ($roles as $role_slug => $role_array) {
-            $role_option_elements .= sprintf(
-                '<option value="%s" %s>%s</option>',
-                $role_slug,
-                $this->options->rrze_xliff_export_role === $role_slug ? 'selected' : '',
-                $role_array['name']
-            );
-        }
-        printf(
-            '<select name="%1$s" id="%1$s">%2$s</select>',
-            sprintf('%s[rrze_xliff_export_role]', $this->option_name),
-            $role_option_elements
-        );
-    }
     
     /**
      * Header für den Allgemein-Bereich der Einstellungen.
@@ -216,6 +205,50 @@ class Settings
             '<h3>%s</h3>',
             __('General settings', 'rrze-xliff')
         );
+    }
+
+    /**
+     * Feld für Export und Import-Rolle.
+     */
+    public function rrze_xliff_export_import_role()
+    {
+        $roles = get_editable_roles();
+        $role_option_elements = '';
+        foreach ($roles as $role_slug => $role_array) {
+            $role_option_elements .= sprintf(
+                '<option value="%s" %s>%s</option>',
+                $role_slug,
+                $this->options->rrze_xliff_export_import_role === $role_slug ? 'selected' : '',
+                $role_array['name']
+            );
+        }
+        printf(
+            '<select name="%1$s" id="%1$s">%2$s</select>',
+            sprintf('%s[rrze_xliff_export_import_role]', $this->option_name),
+            $role_option_elements
+        );
+    }
+
+    /**
+     * Feld für unterstützte Post-Types.
+     */
+    public function rrze_xliff_export_import_post_types()
+    {
+        $saved_settings = $this->options->rrze_xliff_export_import_post_types;
+        $post_types = get_post_types(['public' => true], 'objects');
+        unset($post_types['attachment']);
+        $post_type_options = '';
+        foreach ($post_types as $post_type) {
+            $post_type_options .= sprintf(
+                '<p><input type="checkbox" value="%1$s" name="%2$s" id="%3$s" %5$s><label for="%3$s">%4$s</label></p>',
+                $post_type->name,
+                sprintf('%s[rrze_xliff_export_import_post_types][%s]', $this->option_name, $post_type->name),
+                sprintf('rrze-xliff-export-import-post-types-%s', $post_type->name),
+                $post_type->label,
+                in_array($post_type->name, $saved_settings) ? 'checked' : ''
+            );
+        }
+        echo $post_type_options;        
     }
 
     /**
