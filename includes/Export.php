@@ -128,7 +128,14 @@ class Export
         } else {
             $to = $email;
             $subject = Options::get_options()->rrze_xliff_export_email_subject;
-            // @todo: Platzhalter ersetzen.
+            // Platzhalter ersetzen. Wenn es um einen Bulk-Export geht, Platzhalter rauslöschen.
+            if (isset($zip)) {
+                $subject = str_replace('%%POST_ID%%', '', $subject);
+                $subject = str_replace('%%POST_TITLE%%', '', $subject);
+            } else {
+                $subject = str_replace('%%POST_ID%%', $this->xliff_files[0]['post_id'], $subject);
+                $subject = str_replace('%%POST_TITLE%%', get_the_title($this->xliff_files[0]['post_id']), $subject);
+            }
 
             $body = __('Here comes the email export', 'rrze-xliff');
             $headers = ['Content-Type: text/html; charset=UTF-8'];
