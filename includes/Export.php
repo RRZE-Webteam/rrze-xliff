@@ -207,11 +207,33 @@ class Export
                 continue;
             }
                     
-            $elements[] = (object) array(
+            $elements[] = (object) [
                 'field_type' => '_meta_' . $meta_key,
                 'field_data' => $meta_value,
                 'field_data_translated' => $meta_value,            
-            );
+            ];
+        }
+
+        // Handling des Beitragsbilds.
+        $post_thumbnail = get_the_post_thumbnail($post_id);
+        if ($post_thumbnail !== '') {
+            $alt_text = get_post_meta(get_post_thumbnail_id($post_id), '_wp_attachment_image_alt', true);
+            if ($alt_text !== '') {
+                $elements[] = (object) [
+                    'field_type' => 'post_thumbnail_alt_text',
+                    'field_data' => $alt_text,
+                    'field_data_translated' => $alt_text, 
+                ];
+            }
+
+            $caption = get_the_post_thumbnail_caption($post_id);
+            if ($caption !== '') {
+                $elements[] = (object) [
+                    'field_type' => 'post_thumbnail_caption',
+                    'field_data' => $caption,
+                    'field_data_translated' => $caption, 
+                ];
+            }
         }
 
         $translation = (object) [
@@ -226,8 +248,6 @@ class Export
             $field_data = $element->field_data;
             $field_data_translated = $element->field_data_translated;
             if ($field_data != '') {
-                $field_data = str_replace(PHP_EOL, '<br class="xliff-newline" />', $field_data);
-                $field_data_translated = str_replace(PHP_EOL, '<br class="xliff-newline" />', $field_data_translated);
                 $translation_units .= sprintf(
                     '        <unit id="%1$s">
             <segment>
@@ -245,7 +265,7 @@ class Export
         $file = sprintf(
             '<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="%1$s">
     <file id="f1">
-%3$s
+%2$s
     </file>
 </xliff>',
             $source_language_code,
