@@ -217,7 +217,9 @@ class Export
         // Handling des Beitragsbilds.
         $post_thumbnail = get_the_post_thumbnail($post_id);
         if ($post_thumbnail !== '') {
-            $alt_text = get_post_meta(get_post_thumbnail_id($post_id), '_wp_attachment_image_alt', true);
+            $post_thumbnail_id = get_post_thumbnail_id($post_id);
+            $post_thumbnail_post = get_post($post_thumbnail_id);
+            $alt_text = get_post_meta($post_thumbnail_id, '_wp_attachment_image_alt', true);
             if ($alt_text !== '') {
                 $elements[] = (object) [
                     'field_type' => 'post_thumbnail_alt_text',
@@ -226,12 +228,30 @@ class Export
                 ];
             }
 
-            $caption = get_the_post_thumbnail_caption($post_id);
+            $caption = $post_thumbnail_post->post_excerpt;
             if ($caption !== '') {
                 $elements[] = (object) [
                     'field_type' => 'post_thumbnail_caption',
                     'field_data' => $caption,
                     'field_data_translated' => $caption, 
+                ];
+            }
+
+            $title = $post_thumbnail_post->post_title;
+            if ($title !== '') {
+                $elements[] = (object) [
+                    'field_type' => 'post_thumbnail_title',
+                    'field_data' => $title,
+                    'field_data_translated' => $title, 
+                ];
+            }
+
+            $description = $post_thumbnail_post->post_content;
+            if ($description !== '') {
+                $elements[] = (object) [
+                    'field_type' => 'post_thumbnail_description',
+                    'field_data' => $description,
+                    'field_data_translated' => $description, 
                 ];
             }
         }
