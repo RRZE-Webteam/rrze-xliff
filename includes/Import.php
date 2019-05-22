@@ -14,7 +14,13 @@ class Import
     public function __construct()
     {
         $this->helpers = new Helpers();
-        add_action('add_meta_boxes', [$this, 'meta_box']);
+
+        // Meta-Box registrieren, wenn der Block-Editor nicht genutzt wird.
+        add_action('current_screen', function($screen) {
+            if (! $screen->is_block_editor) {
+                add_action('add_meta_boxes', [$this, 'meta_box']);
+            }
+        });
         add_action('save_post', [$this, 'save_post']);
         add_action('post_edit_form_tag', [$this, 'update_edit_form']);
     }

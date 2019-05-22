@@ -16,13 +16,22 @@ class Export
         $this->helpers = new Helpers();
         
         add_action('admin_init', function() {
+            // Bulk-Export-Optionen für alle ausgewählten Beitragstypen anzeigen.
             $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
             foreach ($post_types as $post_type) {
                 add_filter("bulk_actions-edit-$post_type", [$this, 'bulk_export_action']);
                 add_filter("handle_bulk_actions-edit-$post_type", [$this, 'bulk_export_handler'], 10, 3);
             }
+
+            // Script für Bulk-Export einbinden.
             add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
-            add_action('add_meta_boxes', [$this, 'meta_box']);
+
+            // Meta-Box registrieren, wenn der Block-Editor nicht genutzt wird.
+            add_action('current_screen', function($screen) {
+                if (! $screen->is_block_editor) {
+                    add_action('add_meta_boxes', [$this, 'meta_box']);
+                }
+            });
             if ($this->helpers->is_user_capable() && isset($_GET['xliff-export']) && absint($_GET['xliff-export'])) {
                 // XLIFF-String holen.
                 $xliff_file = $this->get_xliff_file($_GET['xliff-export']);
