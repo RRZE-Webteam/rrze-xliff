@@ -169,9 +169,21 @@ class Settings
         }
         
         // Prüfen, ob die Benutzerrolle gültig ist.
-        $selected_role = $input['rrze_xliff[rrze_xliff_export_import_role]'];
+        $selected_role = $input['rrze_xliff_export_import_role'];
         if (get_role($selected_role) === null) {
-            $input['rrze_xliff[rrze_xliff_export_import_role]'] = Options::get_default_options()->rrze_xliff_export_import_role;
+            $input['rrze_xliff_export_import_role'] = Options::get_default_options()->rrze_xliff_export_import_role;
+        }
+        
+        // Prüfen, ob E-Mail-Adresse angegeben wurde.
+        $email_address = $input['rrze_xliff_export_email_address'];
+        if ($email_address === '' || filter_var($email_address, FILTER_VALIDATE_EMAIL) === false) {
+            $input['rrze_xliff_export_email_address'] = Options::get_default_options()->rrze_xliff_export_email_address;
+        }
+        
+        // Prüfen, ob E-Mail-Betreff angegeben wurde.
+        $email_subject = $input['rrze_xliff_export_email_subject'];
+        if ($email_subject === '') {
+            $input['rrze_xliff_export_email_subject'] = Options::get_default_options()->rrze_xliff_export_email_subject;
         }
 
         return $input;
