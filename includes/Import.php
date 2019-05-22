@@ -89,6 +89,10 @@ class Import
     }
 
     /**
+     * @todo: Admin-Nachrichten anzeigen, wenn etwas schief läuft.
+     */
+
+    /**
      * Importieren einer XLIFF-Datei.
      */
     protected function import_file(int $post_id, array $file)
@@ -124,8 +128,16 @@ class Import
             $attr = $unit->attributes();
             if ((string) $attr['id'] === 'title') {
                 $post_array['post_title'] = (string) $unit->segment->target;
-            } else if ((string) $attr['id'] === 'body') {
+            } elseif ((string) $attr['id'] === 'body') {
                 $post_array['post_content'] = (string) $unit->segment->target;
+            } elseif ($type === 'excerpt') {
+                $post_array['post_excerpt'] = (string) $node->target;
+            } elseif (strpos($type, '_meta_') === 0) {
+                $meta_key = (string) substr($type, strlen('_meta_'));
+                $meta_value = (string) $unit->segment->target;
+                if (!empty($meta_value) && !is_numeric($meta_value)) {
+                    $post_meta_array[$meta_key] = $meta_value;
+                } 
             }
         }
 
@@ -133,7 +145,29 @@ class Import
             return new WP_Error('post_update_error', __('Ein unbekannter Fehler ist aufgetreten. Das Dokument konnte nicht gespeichert werden.', 'rrze-xliff'));
         }
 
-        // @todo: Post meta.
+        $post_meta = get_post_meta($post_id);
+        foreach ($post_meta as $meta_key => $prev_value) {
+            if (strpos($meta_key, '_') === 0) {
+                continue;
+            }
+
+            if (empty($meta_value)) {
+                continue;
+            }
+
+            $prev_value = array_map('maybe_unserialize', $prev_value);
+            $prev_value = $prev_value[0];
+
+            if (empty($prev_value) || is_array($prev_value) || is_numeric($prev_value)) {
+                continue;
+            }
+            
+            if(isset($post_meta_array[$meta_key])) {
+                update_post_meta($post_id, $meta_key, $post_meta_array[$meta_key], $prev_value);
+            } else {
+                add_post_meta($post_id, $meta_key, $post_meta_array[$meta_key]);
+            }
+        }
     }
 
     /**
