@@ -114,7 +114,7 @@ class Settings
             'rrze_xliff_section_export',
             [
                 'label_for' => sprintf('%s[rrze_xliff_export_email_subject]', $this->option_name),
-                'description' => __('You can use the following template tags: %%POST_ID%%, %%POST_TITLE%%, %%TARGET_LANGUAGE%%')
+                'description' => __('You can use the following template tags: %%POST_ID%%, %%POST_TITLE%%')
             ]
         );
         
