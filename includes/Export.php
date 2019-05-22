@@ -175,13 +175,6 @@ class Export
         }
         $source_language_code = substr($source_language_code, 0, 2);
 
-        //$language_code = get_post_meta($post_id, '_translate_to_lang_post_meta', true);
-        $language_code = 'en_US';
-        if ($language_code == '') {
-            return new \WP_Error('no_target_lang_code', __('No target language code set.', 'rrze-xliff'));
-        }
-        $language_code = substr($language_code, 0, 2);
-
         // XLIFF-Markup erstellen.
         $elements = [
             (object) [
@@ -228,7 +221,6 @@ class Export
         $translation = (object) [
             'original' => sanitize_file_name(sprintf('%1$s-%2$s', $export_post->post_title, $export_post->ID)),
             'source_language_code' => $source_language_code,
-            'language_code' => $language_code,
             'elements' => $elements
         ];
 
@@ -255,13 +247,12 @@ class Export
         }
         
         $file = sprintf(
-            '<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="%1$s" trgLang="%2$s">
+            '<xliff xmlns="urn:oasis:names:tc:xliff:document:2.0" version="2.0" srcLang="%1$s">
     <file id="f1">
 %3$s
     </file>
 </xliff>',
             $source_language_code,
-            $language_code,
             $translation_units
         );
 
