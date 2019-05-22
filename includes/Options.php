@@ -19,7 +19,7 @@ class Options
     protected static function default_options()
     {
         $options = [
-            'rrze_xliff_export_email_address' => '',
+            'rrze_xliff_export_email_address' => get_option('admin_email'),
             'rrze_xliff_export_email_subject' => 'XLIFF-Export',
             'rrze_xliff_export_import_role' => 'editor',
             'rrze_xliff_export_import_post_types' => ['post', 'page'],
