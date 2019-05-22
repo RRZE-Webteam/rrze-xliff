@@ -290,6 +290,7 @@ class Export
         array_push($this->xliff_files, [
             'filename' => $filename,
             'file_content' => $file,
+            'post_id' => $post_id,
         ]);
         
         return $file;
