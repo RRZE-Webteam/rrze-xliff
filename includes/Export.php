@@ -165,11 +165,7 @@ class Export
             return new \WP_Error('no_post', __('The submitted ID for export does not match a post', 'rrze-xliff'));
         }
         
-        /**
-         * @todo: die Translate-Meta-Strings dynamisch holen.
-         */
-        //$source_language_code = get_post_meta($post_id, '_translate_from_lang_post_meta', true);
-        $source_language_code = 'de_DE';
+        $source_language_code = \get_bloginfo('language');
         if ($source_language_code == '') {
             return new \WP_Error('no_source_lang_code', __('No source language code set.', 'rrze-xliff'));
         }
