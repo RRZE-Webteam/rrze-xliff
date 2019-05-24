@@ -219,40 +219,48 @@ class Export
         if ($post_thumbnail !== '') {
             $post_thumbnail_id = get_post_thumbnail_id($post_id);
             $post_thumbnail_post = get_post($post_thumbnail_id);
-            $alt_text = get_post_meta($post_thumbnail_id, '_wp_attachment_image_alt', true);
-            if ($alt_text !== '') {
-                $elements[] = (object) [
-                    'field_type' => 'post_thumbnail_alt_text',
-                    'field_data' => $alt_text,
-                    'field_data_translated' => $alt_text, 
-                ];
-            }
+            $elements = $this->get_img_data($elements, $post_thumbnail_post, 'post_thumbnail');
+        }
 
-            $caption = $post_thumbnail_post->post_excerpt;
-            if ($caption !== '') {
-                $elements[] = (object) [
-                    'field_type' => 'post_thumbnail_caption',
-                    'field_data' => $caption,
-                    'field_data_translated' => $caption, 
-                ];
-            }
+        $post_images_ids = [];
 
-            $title = $post_thumbnail_post->post_title;
-            if ($title !== '') {
-                $elements[] = (object) [
-                    'field_type' => 'post_thumbnail_title',
-                    'field_data' => $title,
-                    'field_data_translated' => $title, 
-                ];
-            }
+        $attached_images = get_attached_media('image', $post_id);
 
-            $description = $post_thumbnail_post->post_content;
-            if ($description !== '') {
-                $elements[] = (object) [
-                    'field_type' => 'post_thumbnail_description',
-                    'field_data' => $description,
-                    'field_data_translated' => $description, 
-                ];
+        if (! empty($attached_images)) {
+            foreach ($attached_images as $attached_image) {
+                // Prüfen, ob das Bild bereits vorgekommen ist.
+                if (in_array($attached_image->ID, $post_images_ids)) {
+                    continue;
+                }
+
+                array_push($post_images_ids, $attached_image->ID);
+
+                $elements = $this->get_img_data($elements, $attached_image, "attached_img_$attached_image->ID");
+            }
+        }
+
+        $galleries = get_post_galleries($post_id, false);
+
+        if (! empty($galleries)) {
+            foreach ($galleries as $gallery) {
+                $ids = explode(',', $gallery['ids']);
+                if (is_array($ids) && ! empty($ids)) {
+                    foreach ($ids as $image_id) {
+                        if (in_array($image_id, $post_images_ids)) {
+                            continue;
+                        }
+
+                        $image = get_post($image_id);
+
+                        if ($image === null) {
+                            continue;
+                        }
+
+                        array_push($post_images_ids, $image_id);
+
+                        $elements = $this->get_img_data($elements, $image, "gallery_img_$image_id");
+                    }
+                }
             }
         }
 
@@ -321,6 +329,50 @@ class Export
         ]);
         
         return $file;
+    }
+
+    /**
+     * Get meta data from image object and store it in elements array.
+     */
+    protected function get_img_data(array $elements, object $img_obj, string $img_id_string): array
+    {
+        $alt_text = get_post_meta($img_obj->ID, '_wp_attachment_image_alt', true);
+        if ($alt_text !== '') {
+            $elements[] = (object) [
+                'field_type' => $img_id_string . '_alt_text',
+                'field_data' => $alt_text,
+                'field_data_translated' => $alt_text, 
+            ];
+        }
+
+        $caption = $img_obj->post_excerpt;
+        if ($caption !== '') {
+            $elements[] = (object) [
+                'field_type' => $img_id_string . '_caption',
+                'field_data' => $caption,
+                'field_data_translated' => $caption, 
+            ];
+        }
+
+        $title = $img_obj->post_title;
+        if ($title !== '') {
+            $elements[] = (object) [
+                'field_type' => $img_id_string . '_title',
+                'field_data' => $title,
+                'field_data_translated' => $title, 
+            ];
+        }
+
+        $description = $img_obj->post_content;
+        if ($description !== '') {
+            $elements[] = (object) [
+                'field_type' => $img_id_string . '_description',
+                'field_data' => $description,
+                'field_data_translated' => $description, 
+            ];
+        }
+
+        return $elements;
     }
     
     /**
