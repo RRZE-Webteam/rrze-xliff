@@ -62,7 +62,8 @@ registerPlugin( 'rrze-xliff', {
                     oDOM = oParser.parseFromString(xliffString.target.result, 'application/xml'),
                     submitButton = document.querySelector('#xliff-import-button'),
                     title,
-                    content;
+                    content,
+                    metaValues = {};
 
                 submitButton.removeAttribute('hidden');
 
@@ -94,13 +95,17 @@ registerPlugin( 'rrze-xliff', {
                                                     }
                                                 }
                                             }
+                                        } else if (fileChild.id.indexOf('_meta_') === 0) {
+                                            for (let metaNodes of fileChild.childNodes) {
+                                                if (metaNodes.nodeName === 'segment') {
+                                                    for (let metaNodesegment of metaNodes.childNodes) {
+                                                        if (metaNodesegment.nodeName === 'target') {
+                                                            metaValues = Object.assign(metaValues, {[`${fileChild.id.replace('_meta_', '')}`]: metaNodesegment.textContent})
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
-
-                                        /**
-                                         * @todo: darum kümmern, dass auch Meta-Daten, Beschreibungen von Bildern 
-                                         * et cetera importiert werden. Würde ich dann als Liste in einen Code-Block packen 
-                                         * oder so.
-                                         */
                                     }
                                 }
                             }
@@ -111,14 +116,19 @@ registerPlugin( 'rrze-xliff', {
                 submitButton.addEventListener('click', function(e) {
                     // Das HTML des Beitragsinhalts aus der XLIFF-Datei in Blöcke parsen.
                     content = wp.blocks.parse(content);
-
                     // Die alten Blöcke aus dem Editor löschen.
                     // @link https://wordpress.stackexchange.com/a/305935.
-                    wp.data.dispatch( 'core/editor' ).resetBlocks([]);
+                    wp.data.dispatch('core/editor').resetBlocks([]);
 
                     // Content-Blöcke einfügen und Titel aktualisieren.
-                    wp.data.dispatch( 'core/editor' ).insertBlocks(content);
+                    wp.data.dispatch('core/editor').insertBlocks(content);
                     wp.data.dispatch('core/editor').editPost({title});
+
+                    // Update post meta.
+                    let meta = wp.data.select('core/editor').getEditedPostAttribute('meta');
+                    for(let meta_key in metaValues) {
+                        wp.data.dispatch('core/editor').editPost({meta: { ...meta, [meta_key]: metaValues[meta_key]}});
+                    }
                 })
             };
             // Mit FileReader() die ausgewählte Datei auslesen.
