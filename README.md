@@ -16,3 +16,9 @@ Die Funktion ist nur im Backend bei der Bearbeitung von definierten Post-Types f
 ### RRZE Workflow
 
 Das Plugin soll die bisherige Funktionalität im WordPress Plugin [CMS Workflow](https://github.com/RRZE-Webteam/cms-workflow) ersetzen und verbessern.
+
+## Besonderheiten
+
+### Metadata-Import im Block-Editor
+
+Damit der Import von Metadaten im Block-Editor funktioniert, müssen die Metadaten vorher über `register_post_meta()` registriert und dabei mit `'show_in_rest' => true` in der REST-API sichtbar gemacht werden. Andernfalls werden die Metadaten nicht importiert.
