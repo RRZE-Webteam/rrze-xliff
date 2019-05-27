@@ -412,7 +412,7 @@ class Export
             __('Or send the file to an email address:', 'rrze-xliff'),
             __('Email address', 'rrze-xliff'),
             Options::get_options()->rrze_xliff_export_email_address,
-            trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
+            trailingslashit(get_admin_url()) . sprintf("?xliff-export=$post->ID&xliff_export_email_address=%s", Options::get_options()->rrze_xliff_export_email_address),
             __('Send XLIFF file', 'rrze-xliff')
         );
 
