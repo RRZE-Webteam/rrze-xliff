@@ -81,9 +81,18 @@ class Import
             return;
         }
 
+        if (wp_is_post_revision($post_id)) {
+            return;
+        }
+
         if (isset($_FILES['xliff_import_file'])) {
             remove_action('save_post', [$this, 'save_post']);
-            $this->import_file($post_id, $_FILES['xliff_import_file']);
+            $import = $this->import_file($post_id, $_FILES['xliff_import_file']);
+            if (is_wp_error($import)) {
+                Notices::add_notice($import->get_error_message(), 'error');
+            } else {
+                Notices::add_notice(__('Import erfolgreich', 'rrze-xliff'), 'success');
+            }
             add_action('save_post', [$this, 'save_post']);
         }
     }
@@ -94,16 +103,25 @@ class Import
 
     /**
      * Importieren einer XLIFF-Datei.
+     * 
+     * @param int $post_id Die Beitrags-ID.
+     * @param array $file Der Dateiinhalt.
+     * 
+     * @return \WP_Error|true
      */
     protected function import_file(int $post_id, array $file)
     {
         $post = get_post($post_id);
 
         if ($post === null) {
-            return;
+            return new \WP_Error('get_post_error', __('Der übergebenen Post-ID konnte kein Inhalt zugeordnet werden.', 'rrze-xliff'));
         }
 
         $fh = fopen($file['tmp_name'], 'r');
+
+        if ($fh === false) {
+            return new \WP_Error('file_not_found', __('Die Datei wurde nicht gefunden.', 'rrze-xliff')); 
+        }
 
         $data = fread($fh, $file['size']);
 
@@ -114,8 +132,7 @@ class Import
         $xml = simplexml_load_string($data);
 
         if (!$xml) {
-            // @todo: return error message.
-            return;
+            return new \WP_Error('load_xml_error', __('Der Dateiinhalt ist kein XLIFF.', 'rrze-xliff'));
         }
 
         $post_array = [
@@ -130,10 +147,10 @@ class Import
                 $post_array['post_title'] = (string) $unit->segment->target;
             } elseif ((string) $attr['id'] === 'body') {
                 $post_array['post_content'] = (string) $unit->segment->target;
-            } elseif ($type === 'excerpt') {
+            } elseif ((string) $attr['id'] === 'excerpt') {
                 $post_array['post_excerpt'] = (string) $node->target;
-            } elseif (strpos($type, '_meta_') === 0) {
-                $meta_key = (string) substr($type, strlen('_meta_'));
+            } elseif (strpos((string) $attr['id'], '_meta_') === 0) {
+                $meta_key = (string) substr((string) $attr['id'], strlen('_meta_'));
                 $meta_value = (string) $unit->segment->target;
                 if (!empty($meta_value) && !is_numeric($meta_value)) {
                     $post_meta_array[$meta_key] = $meta_value;
@@ -142,7 +159,7 @@ class Import
         }
 
         if (!wp_update_post($post_array)) {
-            return new WP_Error('post_update_error', __('Ein unbekannter Fehler ist aufgetreten. Das Dokument konnte nicht gespeichert werden.', 'rrze-xliff'));
+            return new \WP_Error('post_update_error', __('Ein unbekannter Fehler ist aufgetreten. Das Dokument konnte nicht gespeichert werden.', 'rrze-xliff'));
         }
 
         $post_meta = get_post_meta($post_id);
@@ -168,6 +185,8 @@ class Import
                 add_post_meta($post_id, $meta_key, $post_meta_array[$meta_key]);
             }
         }
+
+        return true;
     }
 
     /**

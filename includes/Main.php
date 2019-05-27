@@ -7,6 +7,7 @@ defined('ABSPATH') || exit;
 class Main
 {
     protected $helpers;
+
     /**
      * Main-Klasse wird instanziiert.
      */
@@ -16,6 +17,7 @@ class Main
         new Export();
         new Import();
         $this->helpers = new Helpers();
+        new Notices();
 
         add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
 
@@ -29,7 +31,7 @@ class Main
     {
         wp_register_style('rrze-xliff', plugins_url('assets/css/rrze-xliff.min.css', plugin_basename(RRZE_PLUGIN_FILE)));
     }
-        
+
     /**
      * Enqueue des Block-Editor-Skripts.
      */

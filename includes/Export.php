@@ -32,6 +32,7 @@ class Export
                     add_action('add_meta_boxes', [$this, 'meta_box']);
                 }
             });
+
             if ($this->helpers->is_user_capable() && isset($_GET['xliff-export']) && absint($_GET['xliff-export'])) {
                 // XLIFF-String holen.
                 $xliff_file = $this->get_xliff_file($_GET['xliff-export']);
@@ -90,8 +91,8 @@ class Export
     {
         // Prüfen ob keine Datei(en) in $this->xliff_files sind.
         if (empty($this->xliff_files)) {
-            _e('No file for download.', 'rrze-xliff');
-            wp_die();
+            Notices::add_notice(__('Keine Datei zum Download/Versand gefunden.', 'rrze-xliff'), 'success');
+            return;
         }
 
         // Prüfen, ob mehr als eine Datei in dem Array vorhanden sind.
@@ -145,10 +146,16 @@ class Export
                     $phpmailer->AddStringAttachment($this->xliff_files[0]['file_content'], $this->xliff_files[0]['filename']);
                 });
 
-                wp_mail($to, $subject, $body, $headers);
+                $mail_sent = wp_mail($to, $subject, $body, $headers);
             } else {
-                wp_mail($to, $subject, $body, $headers, [$zip_filename]);
+                $mail_sent = wp_mail($to, $subject, $body, $headers, [$zip_filename]);
                 unlink($zip_filename);
+            }
+            
+            if ($mail_sent === true) {
+                Notices::add_notice(__('Der Export wurde erfolgreich verschickt.', 'rrze-xliff'), 'success');
+            } else {
+                Notices::add_notice(__('Es gab einen Fehler beim Verschicken des Exports.', 'rrze-xliff'), 'error');
             }
         }
     }
