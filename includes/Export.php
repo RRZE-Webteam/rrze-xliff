@@ -419,11 +419,15 @@ class Export
         printf(
             '<script>
             (function(){
-                document.querySelector("#xliff_export_email_address").addEventListener("blur", function(e) {
-                    var currentUrl = window.location,
-                        exportLink = document.querySelector("#xliff-export-email-address-link"),
-                        exportUrl = currentUrl.protocol + "//" + currentUrl.host + currentUrl.pathname + "?xliff-export=%s&xliff_export_email_address=" + e.target.value;
+                var currentUrl = window.location,
+                    emailExportField = document.querySelector("#xliff_export_email_address"),
+                    exportLink = document.querySelector("#xliff-export-email-address-link"),
+                    emailExportLink = document.querySelector("#xliff-export-email-address-link");
 
+                exportLink.setAttribute("href", currentUrl.protocol + \'//\' + currentUrl.host + currentUrl.pathname + currentUrl.search + \'&xliff-export=%1$s&xliff_export_email_address=\' + emailExportField.value);
+                
+                emailExportField.addEventListener("blur", function(e) {
+                    var exportUrl = currentUrl.protocol + "//" + currentUrl.host + currentUrl.pathname + "?xliff-export=%1$s&xliff_export_email_address=" + e.target.value;
                     exportLink.setAttribute("href", exportUrl);
                 });
             })();
