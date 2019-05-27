@@ -15,43 +15,46 @@ registerPlugin( 'rrze-xliff', {
         const currentUrl = window.location;
         const postId = new URL(currentUrl).searchParams.get('post');
         const xliffExportUrl = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}`;
+        let defaultEmailAdress = rrzeXliffJavaScriptData !== undefined && rrzeXliffJavaScriptData.email_address ? rrzeXliffJavaScriptData.email_address : '';
         const ExportModal = withState({
             isOpen: false,
-            emailAddress: '',
-        })(({isOpen, emailAddress, setState}) => (
-            <Fragment>
-                <Button isTertiary onClick={() => setState({isOpen: true}) }>{__('Export', 'rrze-xliff')}</Button>
-                { isOpen && (
-                    <Modal
-                        title={__('Export post as XLIFF', 'rrze-xliff')}
-                        onRequestClose={ () => setState( { isOpen: false } ) }
-                    >
-                        <p>
-                            <Button
-                                href={ xliffExportUrl }
-                                isDefault={ true }
-                            >
-                                {__('Download XLIFF file', 'rrze-xliff')}
-                            </Button>
-                        </p>
-                        <p><strong>{__( 'Or send the file to an email address:', 'rrze-xliff')}</strong></p>
-                        <TextControl
-                            label={__('Email address', 'rrze-xliff')}
-                            value={ emailAddress }
-                            onChange={ ( emailAddress ) => setState( { emailAddress } ) }
-                        />
-                        <p>
-                            <Button
-                                href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&xliff_export_email_address=${emailAddress}`}
-                                isDefault={ true }
-                            >
-                                {__('Send XLIFF file', 'rrze-xliff')}
-                            </Button>
-                        </p>
-                    </Modal>
-                ) }
-            </Fragment>
-        ) );
+            emailAddress: defaultEmailAdress,
+        })(({isOpen, emailAddress, setState}) => {
+            return (
+                <Fragment>
+                    <Button isTertiary onClick={() => setState({isOpen: true}) }>{__('Export', 'rrze-xliff')}</Button>
+                    { isOpen && (
+                        <Modal
+                            title={__('Export post as XLIFF', 'rrze-xliff')}
+                            onRequestClose={ () => setState( { isOpen: false } ) }
+                        >
+                            <p>
+                                <Button
+                                    href={ xliffExportUrl }
+                                    isDefault={ true }
+                                >
+                                    {__('Download XLIFF file', 'rrze-xliff')}
+                                </Button>
+                            </p>
+                            <p><strong>{__( 'Or send the file to an email address:', 'rrze-xliff')}</strong></p>
+                            <TextControl
+                                label={__('Email address', 'rrze-xliff')}
+                                value={ emailAddress }
+                                onChange={ ( emailAddress ) => setState( { emailAddress } ) }
+                            />
+                            <p>
+                                <Button
+                                    href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&xliff_export_email_address=${emailAddress}`}
+                                    isDefault={ true }
+                                >
+                                    {__('Send XLIFF file', 'rrze-xliff')}
+                                </Button>
+                            </p>
+                        </Modal>
+                    ) }
+                </Fragment>
+            )
+        } );
 
         function handleFiles( files ) {
             const reader = new FileReader();

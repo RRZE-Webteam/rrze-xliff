@@ -40,7 +40,11 @@ class Main
         if ($this->helpers->is_user_capable() && in_array($current_post_type, $post_types)) {
             wp_register_script('rrze-xliff-block-editor-script', plugins_url('assets/dist/js/block-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), ['wp-plugins', 'wp-element', 'wp-edit-post', 'wp-block-serialization-default-parser']);
 
-            wp_enqueue_script('rrze-xliff-block-editor-script');	
+            wp_enqueue_script('rrze-xliff-block-editor-script');
+            
+            wp_localize_script('rrze-xliff-block-editor-script', 'rrzeXliffJavaScriptData', [
+                'email_address' => Options::get_options()->rrze_xliff_export_email_address
+            ]);
         }
     }
 }
