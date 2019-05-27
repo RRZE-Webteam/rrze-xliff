@@ -3,8 +3,10 @@ const {PluginPostStatusInfo} = wp.editPost;
 const {
     Button,
     TextControl,
+    TextareaControl,
     Modal,
     Disabled,
+    Notice
 } = wp.components;
 const {withState} = wp.compose;
 const {__} = wp.i18n;
@@ -16,22 +18,48 @@ registerPlugin( 'rrze-xliff', {
         const postId = new URL(currentUrl).searchParams.get('post');
         const xliffExportUrl = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}`;
         let defaultEmailAdress = rrzeXliffJavaScriptData !== undefined && rrzeXliffJavaScriptData.email_address ? rrzeXliffJavaScriptData.email_address : '';
+
         const ExportModal = withState({
             isOpen: false,
             emailAddress: defaultEmailAdress,
-        })(({isOpen, emailAddress, setState}) => {
+            emailNote: ''
+        })(({isOpen, emailAddress, emailNote, setState}) => {
+
+            function runExport(emailAddress, emailNote) {
+                let xhr = new XMLHttpRequest(),
+                    sendExportButton = document.querySelector('#xliff_export_email_button');
+    
+                sendExportButton.setAttribute('disabled', 'disabled');
+    
+                xhr.open("POST", ajaxurl, true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.onreadystatechange = function() {
+                    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                        /**
+                         * @todo: check if export was successful or not (need to return JSON from the AJAX call error messages).
+                         */
+                        setState({isOpen: false, isSuccessful: true});
+                        wp.data.dispatch('core/notices').createNotice(
+                            'success',
+                            __('Export erfolgreich verschickt.', 'rrze-xliff')
+                        )
+                    }
+                }
+                emailNote = emailNote.replace(/(\r\n|[\r\n])/g, "<br>");
+                xhr.send(`_nonce=${postId}&action=xliff_email_export&xliff_export_post=${postId}&xliff_export_email_address=${emailAddress}&email_export_note=${emailNote}`);
+            }
             return (
                 <Fragment>
                     <Button isTertiary onClick={() => setState({isOpen: true}) }>{__('Export', 'rrze-xliff')}</Button>
-                    { isOpen && (
+                    {isOpen && (
                         <Modal
                             title={__('Export post as XLIFF', 'rrze-xliff')}
-                            onRequestClose={ () => setState( { isOpen: false } ) }
+                            onRequestClose={() => setState({isOpen: false})}
                         >
                             <p>
                                 <Button
-                                    href={ xliffExportUrl }
-                                    isDefault={ true }
+                                    href={xliffExportUrl}
+                                    isDefault={true}
                                 >
                                     {__('Download XLIFF file', 'rrze-xliff')}
                                 </Button>
@@ -39,22 +67,30 @@ registerPlugin( 'rrze-xliff', {
                             <p><strong>{__( 'Or send the file to an email address:', 'rrze-xliff')}</strong></p>
                             <TextControl
                                 label={__('Email address', 'rrze-xliff')}
-                                value={ emailAddress }
-                                onChange={ ( emailAddress ) => setState( { emailAddress } ) }
+                                value={emailAddress}
+                                onChange={(emailAddress) => setState({emailAddress})}
+                                id='xliff_export_email_address'
+                            />
+                            <TextareaControl
+                                label={__('Email text', 'rrze-xliff')}
+                                id='email_export_note'
+                                value={emailNote}
+                                onChange={(emailNote) => setState({emailNote})}
                             />
                             <p>
                                 <Button
-                                    href={`${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}&xliff_export_email_address=${emailAddress}`}
-                                    isDefault={ true }
+                                    onClick={() => runExport(emailAddress, emailNote)}
+                                    isDefault={true}
+                                    id='xliff_export_email_button'
                                 >
                                     {__('Send XLIFF file', 'rrze-xliff')}
                                 </Button>
                             </p>
                         </Modal>
-                    ) }
+                    )}
                 </Fragment>
             )
-        } );
+        });
 
         function handleFiles( files ) {
             const reader = new FileReader();

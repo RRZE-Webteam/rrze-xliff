@@ -32,16 +32,32 @@ class Export
                     add_action('add_meta_boxes', [$this, 'meta_box']);
                 }
             });
-
+            
+            // Download eines einzelnen Exports.
             if ($this->helpers->is_user_capable() && isset($_GET['xliff-export']) && absint($_GET['xliff-export'])) {
                 // XLIFF-String holen.
                 $xliff_file = $this->get_xliff_file($_GET['xliff-export']);
+                
                 if (is_wp_error($xliff_file)) {
                     echo $xliff_file->get_error_message();
                     wp_die();
                 }
-                if (isset($_GET['xliff_export_email_address'])) {
-                    $this->send_xliff_download($_GET['xliff_export_email_address']);
+
+                $this->send_xliff_download();
+            }
+        });
+        
+        // AJAX-Aktion für Exportversand via E-Mail.
+        add_action( 'wp_ajax_xliff_email_export', function() {
+            if ($this->helpers->is_user_capable()) {
+                // XLIFF-String holen.
+                $xliff_file = $this->get_xliff_file($_POST['xliff_export_post']);
+                if (is_wp_error($xliff_file)) {
+                    echo $xliff_file->get_error_message();
+                    wp_die();
+                }
+                if (isset($_POST['xliff_export_email_address'])) {
+                    $this->send_xliff_download($_POST['xliff_export_email_address'], $_POST['email_export_note']);
                 } else {
                     $this->send_xliff_download();
                 }
@@ -75,7 +91,7 @@ class Export
             $this->send_xliff_download();
         } else {
             if (isset($_GET['xliff-bulk-export-email'])) {
-                $this->send_xliff_download($_GET['xliff-bulk-export-email']);
+                $this->send_xliff_download($_GET['xliff-bulk-export-email'], $_GET['xliff-bulk-export-note']);
             } else {
                 $this->send_xliff_download();
             }
@@ -87,7 +103,7 @@ class Export
     /**
      * XLIFF-Datei als Download bereitstellen oder via Mail versenden.
      */
-    protected function send_xliff_download(string $email = '')
+    protected function send_xliff_download(string $email = '', string $body = '')
     {
         // Prüfen ob keine Datei(en) in $this->xliff_files sind.
         if (empty($this->xliff_files)) {
@@ -129,6 +145,9 @@ class Export
         } else {
             $to = $email;
             $subject = Options::get_options()->rrze_xliff_export_email_subject;
+            if ($body === '') {
+                $body = __('XLIFF-Export', 'rrze-xliff');
+            }
             // Platzhalter ersetzen. Wenn es um einen Bulk-Export geht, Platzhalter rauslöschen.
             if (isset($zip)) {
                 $subject = str_replace('%%POST_ID%%', '', $subject);
@@ -138,7 +157,6 @@ class Export
                 $subject = str_replace('%%POST_TITLE%%', get_the_title($this->xliff_files[0]['post_id']), $subject);
             }
 
-            $body = __('Here comes the email export', 'rrze-xliff');
             $headers = ['Content-Type: text/html; charset=UTF-8'];
             
             if (!isset($zip)) {
@@ -412,34 +430,43 @@ class Export
             <p>
                 <label style="display: block" for="xliff_export_email_address">%s</label>
                 <input type="email" value="%s" id="xliff_export_email_address" name="xliff_export_email_address">
+                <label style="display: block" for="xliff_export_email_note">%s</label>
+                <textarea name="xliff_export_email_note" id="xliff_export_email_note" style="width: 100%%;"></textarea>
             </p>
-            <p><a href="%s" class="button" id="xliff-export-email-address-link">%s</a></p>',
+            <p><button class="button" id="xliff-export-email-address-link">%s</button></p>',
             trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
             __('Download XLIFF file', 'rrze-xliff'),
             __('Or send the file to an email address:', 'rrze-xliff'),
             __('Email address', 'rrze-xliff'),
             Options::get_options()->rrze_xliff_export_email_address,
-            trailingslashit(get_admin_url()) . sprintf("?xliff-export=$post->ID&xliff_export_email_address=%s", Options::get_options()->rrze_xliff_export_email_address),
+            __('Email text', 'rrze-xliff'),
             __('Send XLIFF file', 'rrze-xliff')
         );
 
         printf(
             '<script>
             (function(){
-                var currentUrl = window.location,
-                    emailExportField = document.querySelector("#xliff_export_email_address"),
-                    exportLink = document.querySelector("#xliff-export-email-address-link"),
-                    emailExportLink = document.querySelector("#xliff-export-email-address-link");
-
-                exportLink.setAttribute("href", currentUrl.protocol + \'//\' + currentUrl.host + currentUrl.pathname + currentUrl.search + \'&xliff-export=%1$s&xliff_export_email_address=\' + emailExportField.value);
+                var xliffEmailExportField = document.querySelector("#xliff_export_email_address"),
+                    xliffEmailExportButton = document.querySelector("#xliff-export-email-address-link"),
+                    xliffEmailNote = document.querySelector("#xliff_export_email_note");
                 
-                emailExportField.addEventListener("blur", function(e) {
-                    var exportUrl = currentUrl.protocol + "//" + currentUrl.host + currentUrl.pathname + "?xliff-export=%1$s&xliff_export_email_address=" + e.target.value;
-                    exportLink.setAttribute("href", exportUrl);
+                xliffEmailExportButton.addEventListener("click", function(e){
+                    e.preventDefault();
+                    var xhr = new XMLHttpRequest();
+
+                    xhr.open("POST", ajaxurl, true);
+                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.onreadystatechange = function() {
+                        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                            // Request finished. Do processing here.
+                        }
+                    }
+                    xhr.send("_nonce=%2$s&action=xliff_email_export&xliff_export_post=%1$s&xliff_export_email_address=" + xliffEmailExportField.value + "&email_export_note=" + xliffEmailNote.value.replace(/(\r\n|[\r\n])/g, "<br>"));
                 });
             })();
             </script>',
-            $post->ID
+            $post->ID,
+            wp_create_nonce('xliff_export')
         );
     }
     
