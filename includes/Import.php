@@ -98,10 +98,6 @@ class Import
     }
 
     /**
-     * @todo: Admin-Nachrichten anzeigen, wenn etwas schief läuft.
-     */
-
-    /**
      * Importieren einer XLIFF-Datei.
      * 
      * @param int $post_id Die Beitrags-ID.
