@@ -133,11 +133,12 @@ class Export
         // Entscheiden, ob die Datei heruntergeladen oder per Mail verschickt werden soll.
         if ($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             if (isset($zip)) {
-                header("Content-Description: File Transfer");
-                header("Content-Type: application/octet-stream");
-                header('Content-Disposition: attachment; filename=' . $zip_filename);
+                header('Content-Type: application/zip');
+                header('Content-disposition: attachment; filename='.$zip_filename);
+                header('Content-Length: ' . filesize($zip_filename));
                 readfile($zip_filename);
                 unlink($zip_filename);
+                exit;
             } else {
                 header('Content-Description: File Transfer');
                 header('Content-Disposition: attachment; filename=' . $this->xliff_files[0]['filename']);
