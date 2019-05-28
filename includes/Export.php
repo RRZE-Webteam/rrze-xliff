@@ -437,6 +437,9 @@ class Export
                 <label style="display: block" for="xliff_export_email_note">%s</label>
                 <textarea name="xliff_export_email_note" id="xliff_export_email_note" style="width: 100%%;"></textarea>
             </p>
+            <div class="xliff-export-notices">
+
+            </div>
             <p><button class="button" id="xliff-export-email-address-link">%s</button></p>',
             trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
             __('Download XLIFF file', 'rrze-xliff'),
@@ -445,33 +448,6 @@ class Export
             Options::get_options()->rrze_xliff_export_email_address,
             __('Email text', 'rrze-xliff'),
             __('Send XLIFF file', 'rrze-xliff')
-        );
-
-        printf(
-            '<script>
-            (function(){
-                var xliffEmailExportField = document.querySelector("#xliff_export_email_address"),
-                    xliffEmailExportButton = document.querySelector("#xliff-export-email-address-link"),
-                    xliffEmailNote = document.querySelector("#xliff_export_email_note");
-                
-                xliffEmailExportButton.addEventListener("click", function(e){
-                    e.preventDefault();
-                    var xhr = new XMLHttpRequest();
-
-                    xhr.open("POST", ajaxurl, true);
-                    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    xhr.responseType = "json";
-                    xhr.onreadystatechange = function() {
-                        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                            // Request finished. Do processing here.
-                        }
-                    }
-                    xhr.send("_nonce=%2$s&action=xliff_email_export&xliff_export_post=%1$s&xliff_export_email_address=" + xliffEmailExportField.value + "&email_export_note=" + xliffEmailNote.value.replace(/(\r\n|[\r\n])/g, "<br>"));
-                });
-            })();
-            </script>',
-            $post->ID,
-            wp_create_nonce('xliff_export')
         );
     }
     
