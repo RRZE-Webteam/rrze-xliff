@@ -33,16 +33,18 @@ registerPlugin( 'rrze-xliff', {
     
                 xhr.open("POST", ajaxurl, true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                xhr.responseType = 'json';
                 xhr.onreadystatechange = function() {
                     if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-                        /**
-                         * @todo: check if export was successful or not (need to return JSON from the AJAX call error messages).
-                         */
-                        setState({isOpen: false, isSuccessful: true});
-                        wp.data.dispatch('core/notices').createNotice(
-                            'success',
-                            __('Export erfolgreich verschickt.', 'rrze-xliff')
-                        )
+                        setState({isOpen: false});
+                        if (xhr.response.length > 0) {
+                            xhr.response.forEach(function(currentValue) {
+                                wp.data.dispatch('core/notices').createNotice(
+                                    currentValue.type,
+                                    currentValue.notice
+                                )
+                            });
+                        }
                     }
                 }
                 emailNote = emailNote.replace(/(\r\n|[\r\n])/g, "<br>");

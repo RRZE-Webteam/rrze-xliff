@@ -47,14 +47,26 @@ class Notices
         $current_user_id = get_current_user_id();
         $notice_transient = get_transient("rrze-xliff-admin-notice-$current_user_id");
         if ($notice_transient !== false && is_array($notice_transient)) {
+            $notices = [];
             foreach ($notice_transient as $notice) {
-                printf(
-                    '<div class="notice notice-%s is-dismissible">
-                        <p>%s</p>
-                    </div>',
-                    $notice['type'],
-                    $notice['notice']
-                );
+                // Prüfen, ob es sich um einen AJAX-Request handelt. In dem Fall JSON zurückgeben.
+                if (isset($_POST['action']) && $_POST['action'] === 'xliff_email_export') {
+                    array_push($notices, $notice);
+                } else {
+                    printf(
+                        '<div class="notice notice-%s is-dismissible">
+                            <p>%s</p>
+                        </div>',
+                        $notice['type'],
+                        $notice['notice']
+                    );
+                }
+            }
+
+            delete_transient("rrze-xliff-admin-notice-$current_user_id");
+
+            if (isset($_POST['action']) && $_POST['action'] === 'xliff_email_export') {
+                wp_send_json($notices);
             }
         }
 

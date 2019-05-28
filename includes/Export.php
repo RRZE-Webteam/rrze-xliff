@@ -61,6 +61,10 @@ class Export
                 } else {
                     $this->send_xliff_download();
                 }
+
+                // Return JSON of notice(s).
+                (new Notices())
+                    ->admin_notices();
             }
         });
     }
@@ -456,6 +460,7 @@ class Export
 
                     xhr.open("POST", ajaxurl, true);
                     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                    xhr.responseType = "json";
                     xhr.onreadystatechange = function() {
                         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                             // Request finished. Do processing here.
