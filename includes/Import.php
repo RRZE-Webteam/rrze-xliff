@@ -85,7 +85,7 @@ class Import
             return;
         }
 
-        if (isset($_FILES['xliff_import_file'])) {
+        if (isset($_FILES['xliff_import_file']) && $_FILES['xliff_import_file']['tmp_name'] !== '') {
             remove_action('save_post', [$this, 'save_post']);
             $import = $this->import_file($post_id, $_FILES['xliff_import_file']);
             if (is_wp_error($import)) {
