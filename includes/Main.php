@@ -91,6 +91,10 @@ class Main
             $post_type = get_post_type();
             if (in_array($post_type, $post_types) && $current_screen->id === "edit-$post_type") {
                 wp_enqueue_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
+            
+                wp_localize_script('rrze-xliff-bulk-export', 'rrzeXliffJavaScriptData', [
+                    'email_address' => Options::get_options()->rrze_xliff_export_email_address
+                ]);
             }
         }
     }

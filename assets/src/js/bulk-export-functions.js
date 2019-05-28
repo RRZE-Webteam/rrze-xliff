@@ -49,6 +49,7 @@
         emailField.setAttribute('type', 'email');
         emailField.setAttribute('id', 'xliff-bulk-export-email');
         emailField.setAttribute('name', 'xliff-bulk-export-email');
+        emailField.value = rrzeXliffJavaScriptData.email_address;
         emailLabel.append(document.createTextNode('E-Mail-Adresse'));
         emailLabel.setAttribute('for', 'xliff-bulk-export-email');
         emailLabel.setAttribute('style', 'display: block;');
