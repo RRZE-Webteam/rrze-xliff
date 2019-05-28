@@ -23,9 +23,6 @@ class Export
                 add_filter("handle_bulk_actions-edit-$post_type", [$this, 'bulk_export_handler'], 10, 3);
             }
 
-            // Script für Bulk-Export einbinden.
-            add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
-
             // Meta-Box registrieren, wenn der Block-Editor nicht genutzt wird.
             add_action('current_screen', function($screen) {
                 if (! $screen->is_block_editor) {
@@ -449,22 +446,5 @@ class Export
             __('Email text', 'rrze-xliff'),
             __('Send XLIFF file', 'rrze-xliff')
         );
-    }
-    
-    /**
-     * Einbinden des Skripts für den Bulk-Export.
-     */
-    public function enqueue_bulk_export_script()
-    {
-        if ($this->helpers->is_user_capable()) {
-            global $current_screen;
-            $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
-            foreach ($post_types as $post_type) {
-                if ($current_screen->id === "edit-$post_type") {
-                    wp_enqueue_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
-                    break;
-                }
-            }
-        }
     }
 }
