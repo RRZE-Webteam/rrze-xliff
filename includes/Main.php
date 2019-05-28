@@ -64,7 +64,8 @@ class Main
     {
         $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
         $current_post_type = get_post_type();
-        if ($this->helpers->is_user_capable() && in_array($current_post_type, $post_types)) {
+        global $current_screen;
+        if ($this->helpers->is_user_capable() && in_array($current_post_type, $post_types) && in_array($current_screen->id, $post_types)) {
             wp_register_script('rrze-xliff-classic-editor-script', plugins_url('assets/dist/js/classic-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], null, true);
 
             wp_enqueue_script('rrze-xliff-classic-editor-script');
