@@ -128,6 +128,8 @@ class Export
             }
         }
 
+        $body = preg_replace('/(\r\n|[\r\n])/', '<br>', $body);
+
         // Entscheiden, ob die Datei heruntergeladen oder per Mail verschickt werden soll.
         if ($email === '' || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             if (isset($zip)) {
