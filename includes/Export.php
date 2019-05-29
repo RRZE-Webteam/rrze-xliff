@@ -12,7 +12,7 @@ class Export
      * Initialisierung des Exporters.
      */
     public function __construct()
-    {		
+    {
         $this->helpers = new Helpers();
         
         add_action('admin_init', function() {
@@ -69,7 +69,7 @@ class Export
     /**
      * Bulk-Action für Mehrfachexport einfügen.
      */
-    public function bulk_export_action(array $bulk_actions)
+    public function bulk_export_action($bulk_actions)
     {
         if ($this->helpers->is_user_capable()) {
             $bulk_actions['xliff_bulk_export'] = __('Bulk XLIFF export', 'rrze-xliff');
@@ -80,7 +80,7 @@ class Export
     /**
      * Bulk-Mehrfachexport ausführen.
      */
-    public function bulk_export_handler(string $redirect_to, string $doaction, array $post_ids): string
+    public function bulk_export_handler($redirect_to, $doaction, $post_ids)
     {
         if ($doaction !== 'xliff_bulk_export' || $this->helpers->is_user_capable() === false) {
             return $redirect_to;
@@ -104,7 +104,7 @@ class Export
     /**
      * XLIFF-Datei als Download bereitstellen oder via Mail versenden.
      */
-    protected function send_xliff_download(string $email = '', string $body = '')
+    protected function send_xliff_download($email = '', $body = '')
     {
         // Prüfen ob keine Datei(en) in $this->xliff_files sind.
         if (empty($this->xliff_files)) {
@@ -363,7 +363,7 @@ class Export
     /**
      * Get meta data from image object and store it in elements array.
      */
-    protected function get_img_data(array $elements, object $img_obj, string $img_id_string): array
+    protected function get_img_data($elements, $img_obj, $img_id_string)
     {
         $alt_text = get_post_meta($img_obj->ID, '_wp_attachment_image_alt', true);
         if ($alt_text !== '') {
@@ -426,7 +426,7 @@ class Export
      *
      * @param object $post Post object.
      */
-    public function the_export_meta_box(object $post)
+    public function the_export_meta_box($post)
     {
         printf(
             '<p><a href="%s" class="button">%s</a></p>

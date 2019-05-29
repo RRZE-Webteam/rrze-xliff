@@ -47,7 +47,7 @@ class Import
      *
      * @param object $post Post object.
      */
-    public function the_import_meta_box(object $post)
+    public function the_import_meta_box($post)
     {
         wp_nonce_field(plugin_basename(__FILE__), 'rrze_xliff_file_import_nonce');
         printf(
@@ -64,7 +64,7 @@ class Import
     /**
      * Import anstoßen.
      */
-    public function save_post(int $post_id)
+    public function save_post($post_id)
     {
         // Nonce prüfen.
         if (!isset($_POST['rrze_xliff_file_import_nonce']) || !\wp_verify_nonce($_POST['rrze_xliff_file_import_nonce'], plugin_basename(__FILE__))) {
@@ -105,7 +105,7 @@ class Import
      * 
      * @return \WP_Error|true
      */
-    protected function import_file(int $post_id, array $file)
+    protected function import_file($post_id, $file)
     {
         $post = get_post($post_id);
 

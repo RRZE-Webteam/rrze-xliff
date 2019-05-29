@@ -20,7 +20,7 @@ class Notices
      * @param string $notice Text der Nachricht.
      * @param string $type Optional. Art der Nachticht. WordPress hat Styles für: info|success|warning|error
      */
-    public static function add_notice(string $notice, string $type = 'info') {
+    public static function add_notice($notice, $type = 'info') {
         $type = esc_attr($type);
         if ($notice !== '' && $type !== '') {
             $current_user_id = get_current_user_id();
