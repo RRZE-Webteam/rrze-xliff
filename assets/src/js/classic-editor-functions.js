@@ -39,4 +39,9 @@
         xliffEmailNote = xliffEmailNote.value.replace(/(\r\n|[\r\n])/g, '<br>');
         xhr.send(`_nonce=${rrzeXliffJavaScriptData.nonce}&action=xliff_email_export&xliff_export_post=${rrzeXliffJavaScriptData.post_id}&xliff_export_email_address=${xliffEmailExportField.value}&email_export_note=${xliffEmailNote}`);
     });
+
+    // Verhindern, dass beim Import eine Warnung wegen ungespeicherter Inhalte kommt.
+    document.querySelector('#xliff_import_button').addEventListener('click', function(e) {
+        $(window).off('beforeunload.edit-post');
+    });
 })();

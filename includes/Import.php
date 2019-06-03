@@ -55,7 +55,7 @@ class Import
                 <label style="display: block" for="xliff_import_file">%s</label>
                 <input type="file" id="xliff_import_file" name="xliff_import_file" accept=".xliff">
             </p>
-            <p><button class="button" type="submit">%s</button></p>',
+            <p><button class="button" id="xliff_import_button" type="submit">%s</button></p>',
             __('Choose XLIFF file to import', 'rrze-xliff'),
             __('Import XLIFF file', 'rrze-xliff')
         );
