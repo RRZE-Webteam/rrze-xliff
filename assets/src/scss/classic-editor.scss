@@ -1,0 +1,182 @@
+// Code von https://github.com/WordPress/gutenberg/blob/master/packages/components/src/modal/style.scss
+
+@mixin reduce-motion($property: "") {
+
+	@if $property == "transition" {
+		@media (prefers-reduced-motion: reduce) {
+			transition-duration: 0s;
+		}
+	}
+
+	@else if $property == "animation" {
+		@media (prefers-reduced-motion: reduce) {
+			animation-duration: 1ms;
+		}
+	}
+
+	@else {
+		@media (prefers-reduced-motion: reduce) {
+			transition-duration: 0s;
+			animation-duration: 1ms;
+		}
+	}
+
+}
+
+@mixin edit-post__fade-in-animation($speed: 0.2s, $delay: 0s) {
+	animation: edit-post__fade-in-animation $speed ease-out $delay;
+	animation-fill-mode: forwards;
+	@include reduce-motion("animation");
+}
+
+// The scrim behind the modal window.
+.components-modal__screen-overlay {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background-color: rgba(#fff, 0.4);
+	z-index: 99999;
+
+	// This animates the appearance of the white background.
+	@include edit-post__fade-in-animation();
+}
+
+// The modal window element.
+.components-modal__frame {
+	// On small screens the content needs to be full width because of limited
+	// space.
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	box-sizing: border-box;
+	margin: 0;
+	border: 1px solid #e2e4e7;
+	background: #fff;
+	box-shadow: 0 3px 30px rgba(25,30,35,.2);
+	overflow: auto;
+
+	// Show a centered modal on bigger screens.
+	@media screen and (min-width: 600px) {
+		top: 50%;
+		right: auto;
+		bottom: auto;
+		left: 50%;
+		min-width: 360px;
+		max-width: calc(100% - 32px);
+		max-height: calc(100% - 112px);
+		transform: translate(-50%, -50%);
+
+		// Animate the modal frame/contents appearing on the page.
+		animation: components-modal__appear-animation 0.1s ease-out;
+		animation-fill-mode: forwards;
+		@include reduce-motion("animation");
+	}
+}
+
+@keyframes components-modal__appear-animation {
+	from {
+		margin-top: 8px * 4;
+	}
+	to {
+		margin-top: 0;
+	}
+}
+
+// Fix header to the top so it is always there to provide context to the modal
+// if the content needs to be scrolled (for example, on the keyboard shortcuts
+// modal screen).
+.components-modal__header {
+	box-sizing: border-box;
+	border-bottom: 1px solid #e2e4e7;
+	padding: 0 16px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	background: #fff;
+	align-items: center;
+	height: 56px;
+	position: sticky;
+	top: 0;
+	z-index: z-index(".components-modal__header");
+	margin: 0 -#{ 16px } 16px;
+
+	// Rules inside this query are only run by Microsoft Edge.
+	// Edge has bugs around position: sticky;, so it needs a separate top rule.
+	// See also https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/17555420/.
+	@supports (-ms-ime-align:auto) {
+		position: fixed;
+		width: 100%;
+	}
+
+	.components-modal__header-heading {
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	h1 {
+		line-height: 1;
+		margin: 0;
+	}
+}
+
+.components-modal__header-heading-container {
+	align-items: center;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+	justify-content: left;
+}
+
+// Modal contents.
+.components-modal__content {
+	box-sizing: border-box;
+	height: 100%;
+	padding: 0 16px 16px;
+
+	// Rules inside this query are only run by Microsoft Edge.
+	// This is a companion top padding to the fixed rule in line 77.
+	@supports (-ms-ime-align:auto) {
+		padding-top: 56px;
+	}
+}
+
+.components-icon-button {
+    align-items: center;
+    background: none;
+    border: none;
+    border-radius: 4px;
+    color: #555d66;
+    cursor: pointer;
+    display: flex;
+    font-size: 13px;
+    margin: 0;
+    overflow: hidden;
+    padding: 8px;
+    position: relative;
+    text-decoration: none;
+    -webkit-appearance: none;
+
+    &:hover,
+    &:focus,
+    &:active {
+        background-color: #fff;
+        color: #191e23;
+        box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff,0 1px 1px rgba(25,30,35,.2);
+    }
+
+    svg {
+        display: inline-block;
+        flex: 0 0 auto;
+        fill: currentColor;
+        outline: none;
+    }
+}
+
+.xliff-export-notices > div {
+    margin-left: 0;
+    margin-right: 0;
+}

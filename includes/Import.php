@@ -15,50 +15,8 @@ class Import
     {
         $this->helpers = new Helpers();
 
-        // Meta-Box registrieren, wenn der Block-Editor nicht genutzt wird.
-        add_action('current_screen', function($screen) {
-            if (! $screen->is_block_editor) {
-                add_action('add_meta_boxes', [$this, 'meta_box']);
-            }
-        });
         add_action('save_post', [$this, 'save_post']);
         add_action('post_edit_form_tag', [$this, 'update_edit_form']);
-    }
-    
-    /**
-     * Metabox registrieren.
-     */
-    public function meta_box()
-    {
-        if ($this->helpers->is_user_capable()) {
-            add_meta_box(
-                'rrze_xliff_import',
-                __('XLIFF import', 'rrze-xliff'),
-                [$this, 'the_import_meta_box'],
-                Options::get_options()->rrze_xliff_export_import_post_types,
-                'side',
-                'low'
-            );
-        }
-    }
-
-    /**
-     * Ausgabe der Metabox für den XLIFF-Import.
-     *
-     * @param object $post Post object.
-     */
-    public function the_import_meta_box($post)
-    {
-        wp_nonce_field(plugin_basename(__FILE__), 'rrze_xliff_file_import_nonce');
-        printf(
-            '<p>
-                <label style="display: block" for="xliff_import_file">%s</label>
-                <input type="file" id="xliff_import_file" name="xliff_import_file" accept=".xliff">
-            </p>
-            <p><button class="button" id="xliff_import_button" type="submit">%s</button></p>',
-            __('Choose XLIFF file to import', 'rrze-xliff'),
-            __('Import XLIFF file', 'rrze-xliff')
-        );
     }
 
     /**
@@ -67,7 +25,7 @@ class Import
     public function save_post($post_id)
     {
         // Nonce prüfen.
-        if (!isset($_POST['rrze_xliff_file_import_nonce']) || !\wp_verify_nonce($_POST['rrze_xliff_file_import_nonce'], plugin_basename(__FILE__))) {
+        if (!isset($_POST['rrze_xliff_file_import_nonce']) || !\wp_verify_nonce($_POST['rrze_xliff_file_import_nonce'], 'rrze-xliff/includes/Main')) {
             return;
         }
 

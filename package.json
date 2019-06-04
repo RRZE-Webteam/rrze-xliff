@@ -16,9 +16,23 @@
   "bugs": {
     "url": "https://github.com/RRZE-Webteam/rrze-xliff/issues"
   },
+  "browserslist": [
+    "extends @wordpress/browserslist-config"
+  ],
   "homepage": "https://github.com/RRZE-Webteam/rrze-xliff#readme",
   "devDependencies": {
-    "@wordpress/scripts": "^3.1.0"
+    "@wordpress/browserslist-config": "^2.4.0",
+    "@wordpress/scripts": "^3.1.0",
+    "autoprefixer": "^9.6.0",
+    "css-loader": "^2.1.1",
+    "extract-loader": "^3.1.0",
+    "file-loader": "^3.0.1",
+    "node-sass": "^4.12.0",
+    "postcss-cli": "^6.1.2",
+    "postcss-loader": "^3.0.0",
+    "sass-loader": "^7.1.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "ally.js": "^1.4.1"
+  }
 }

@@ -22,13 +22,6 @@ class Export
                 add_filter("bulk_actions-edit-$post_type", [$this, 'bulk_export_action']);
                 add_filter("handle_bulk_actions-edit-$post_type", [$this, 'bulk_export_handler'], 10, 3);
             }
-
-            // Meta-Box registrieren, wenn der Block-Editor nicht genutzt wird.
-            add_action('current_screen', function($screen) {
-                if (! $screen->is_block_editor) {
-                    add_action('add_meta_boxes', [$this, 'meta_box']);
-                }
-            });
             
             // Download eines einzelnen Exports.
             if ($this->helpers->is_user_capable() && isset($_GET['xliff-export']) && absint($_GET['xliff-export'])) {
@@ -402,52 +395,5 @@ class Export
         }
 
         return $elements;
-    }
-    
-    /**
-     * Metaboxen registrieren.
-     */
-    public function meta_box()
-    {
-        if ($this->helpers->is_user_capable()) {
-            add_meta_box(
-                'rrze_xliff_export',
-                __('XLIFF export', 'rrze-xliff'),
-                [$this, 'the_export_meta_box'],
-                Options::get_options()->rrze_xliff_export_import_post_types,
-                'side',
-                'low'
-            );
-        }
-    }
-
-    /**
-     * Ausgabe der Metabox für den XLIFF-Export.
-     *
-     * @param object $post Post object.
-     */
-    public function the_export_meta_box($post)
-    {
-        printf(
-            '<p><a href="%s" class="button">%s</a></p>
-            <p><strong>%s</strong></p>
-            <p>
-                <label style="display: block" for="xliff_export_email_address">%s</label>
-                <input type="email" value="%s" id="xliff_export_email_address" name="xliff_export_email_address">
-                <label style="display: block" for="xliff_export_email_note">%s</label>
-                <textarea name="xliff_export_email_note" id="xliff_export_email_note" style="width: 100%%;"></textarea>
-            </p>
-            <div class="xliff-export-notices">
-
-            </div>
-            <p><button class="button" id="xliff-export-email-address-link">%s</button></p>',
-            trailingslashit(get_admin_url()) . "?xliff-export=$post->ID",
-            __('Download XLIFF file', 'rrze-xliff'),
-            __('Or send the file to an email address:', 'rrze-xliff'),
-            __('Email address', 'rrze-xliff'),
-            Options::get_options()->rrze_xliff_export_email_address,
-            __('Email text', 'rrze-xliff'),
-            __('Send XLIFF file', 'rrze-xliff')
-        );
     }
 }
