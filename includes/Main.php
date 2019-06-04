@@ -52,13 +52,15 @@ class Main
         $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
         $current_post_type = get_post_type();
         if ($this->helpers->is_user_capable() && in_array($current_post_type, $post_types)) {
-            wp_register_script('rrze-xliff-block-editor-script', plugins_url('assets/dist/js/block-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), ['wp-plugins', 'wp-element', 'wp-edit-post', 'wp-block-serialization-default-parser']);
+            wp_register_script('rrze-xliff-block-editor-script', plugins_url('assets/dist/js/block-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), ['wp-plugins', 'wp-element', 'wp-edit-post', 'wp-block-serialization-default-parser', 'wp-i18n']);
 
             wp_enqueue_script('rrze-xliff-block-editor-script');
             
             wp_localize_script('rrze-xliff-block-editor-script', 'rrzeXliffJavaScriptData', [
                 'email_address' => Options::get_options()->rrze_xliff_export_email_address
             ]);
+
+            wp_set_script_translations('rrze-xliff-block-editor-script', 'rrze-xliff', trailingslashit(RRZE_PLUGIN_PATH) . 'languages');
         }
     }
 

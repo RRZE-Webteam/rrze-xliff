@@ -49,7 +49,7 @@ class Import
             if (is_wp_error($import)) {
                 Notices::add_notice($import->get_error_message(), 'error');
             } else {
-                Notices::add_notice(__('Import erfolgreich', 'rrze-xliff'), 'success');
+                Notices::add_notice(__('Import successful', 'rrze-xliff'), 'success');
             }
             add_action('save_post', [$this, 'save_post']);
         }
@@ -68,13 +68,13 @@ class Import
         $post = get_post($post_id);
 
         if ($post === null) {
-            return new \WP_Error('get_post_error', __('Der übergebenen Post-ID konnte kein Inhalt zugeordnet werden.', 'rrze-xliff'));
+            return new \WP_Error('get_post_error', __('No content was found for the passed post ID.', 'rrze-xliff'));
         }
 
         $fh = fopen($file['tmp_name'], 'r');
 
         if ($fh === false) {
-            return new \WP_Error('file_not_found', __('Die Datei wurde nicht gefunden.', 'rrze-xliff')); 
+            return new \WP_Error('file_not_found', __('The file was not found.', 'rrze-xliff')); 
         }
 
         $data = fread($fh, $file['size']);
@@ -86,7 +86,7 @@ class Import
         $xml = simplexml_load_string($data);
 
         if (!$xml) {
-            return new \WP_Error('load_xml_error', __('Der Dateiinhalt ist kein XLIFF.', 'rrze-xliff'));
+            return new \WP_Error('load_xml_error', __('The file’s content is no XLIFF.', 'rrze-xliff'));
         }
 
         $post_array = [
@@ -113,7 +113,7 @@ class Import
         }
 
         if (!wp_update_post($post_array)) {
-            return new \WP_Error('post_update_error', __('Ein unbekannter Fehler ist aufgetreten. Das Dokument konnte nicht gespeichert werden.', 'rrze-xliff'));
+            return new \WP_Error('post_update_error', __('An unknown error occurred. The post couldn’t be saved.', 'rrze-xliff'));
         }
 
         $post_meta = get_post_meta($post_id);

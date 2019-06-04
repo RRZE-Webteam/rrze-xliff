@@ -101,7 +101,7 @@ class Export
     {
         // Prüfen ob keine Datei(en) in $this->xliff_files sind.
         if (empty($this->xliff_files)) {
-            Notices::add_notice(__('Keine Datei zum Download/Versand gefunden.', 'rrze-xliff'), 'success');
+            Notices::add_notice(__('No file was found for download or sending.', 'rrze-xliff'), 'success');
             return;
         }
 
@@ -143,7 +143,7 @@ class Export
             $to = $email;
             $subject = Options::get_options()->rrze_xliff_export_email_subject;
             if ($body === '') {
-                $body = __('XLIFF-Export', 'rrze-xliff');
+                $body = __('XLIFF export', 'rrze-xliff');
             }
             // Platzhalter ersetzen. Wenn es um einen Bulk-Export geht, Platzhalter rauslöschen.
             if (isset($zip)) {
@@ -168,9 +168,9 @@ class Export
             }
             
             if ($mail_sent === true) {
-                Notices::add_notice(__('Der Export wurde erfolgreich verschickt.', 'rrze-xliff'), 'success');
+                Notices::add_notice(__('The export was sent successfully.', 'rrze-xliff'), 'success');
             } else {
-                Notices::add_notice(__('Es gab einen Fehler beim Verschicken des Exports.', 'rrze-xliff'), 'error');
+                Notices::add_notice(__('There was an error sending the export.', 'rrze-xliff'), 'error');
             }
         }
     }
