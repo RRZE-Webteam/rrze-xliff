@@ -9,7 +9,6 @@ const {
     Notice
 } = wp.components;
 const {withState} = wp.compose;
-const {__} = wp.i18n;
 const {Fragment} = wp.element;
 
 registerPlugin( 'rrze-xliff', {
@@ -52,10 +51,10 @@ registerPlugin( 'rrze-xliff', {
             }
             return (
                 <Fragment>
-                    <Button isTertiary onClick={() => setState({isOpen: true}) }>{__('Export', 'rrze-xliff')}</Button>
+                    <Button isTertiary onClick={() => setState({isOpen: true}) }>{rrzeXliffJavaScriptData.export}</Button>
                     {isOpen && (
                         <Modal
-                            title={__('Export post as XLIFF', 'rrze-xliff')}
+                            title={rrzeXliffJavaScriptData.export_title}
                             onRequestClose={() => setState({isOpen: false})}
                         >
                             <p>
@@ -63,18 +62,18 @@ registerPlugin( 'rrze-xliff', {
                                     href={xliffExportUrl}
                                     isDefault={true}
                                 >
-                                    {__('Download XLIFF file', 'rrze-xliff')}
+                                    {rrzeXliffJavaScriptData.download}
                                 </Button>
                             </p>
-                            <p><strong>{__( 'Or send the file to an email address:', 'rrze-xliff')}</strong></p>
+                            <p><strong>{rrzeXliffJavaScriptData.send_via_email}</strong></p>
                             <TextControl
-                                label={__('Email address', 'rrze-xliff')}
+                                label={rrzeXliffJavaScriptData.email_address_label}
                                 value={emailAddress}
                                 onChange={(emailAddress) => setState({emailAddress})}
                                 id='xliff_export_email_address'
                             />
                             <TextareaControl
-                                label={__('Email text', 'rrze-xliff')}
+                                label={rrzeXliffJavaScriptData.email_text_label}
                                 id='email_export_note'
                                 value={emailNote}
                                 onChange={(emailNote) => setState({emailNote})}
@@ -85,7 +84,7 @@ registerPlugin( 'rrze-xliff', {
                                     isDefault={true}
                                     id='xliff_export_email_button'
                                 >
-                                    {__('Send XLIFF file', 'rrze-xliff')}
+                                    {rrzeXliffJavaScriptData.send_email}
                                 </Button>
                             </p>
                         </Modal>
@@ -180,13 +179,13 @@ registerPlugin( 'rrze-xliff', {
             isOpen: false,
             hasFile: false,
         } )( ( { isOpen, hasFile, setState } ) => {
-            let button = <Button isDefault id="xliff-import-button" onClick={() => setState({isOpen: false})} hidden="true">{__('Import', 'rrze-xliff')}</Button>;
+            let button = <Button isDefault id="xliff-import-button" onClick={() => setState({isOpen: false})} hidden="true">{rrzeXliffJavaScriptData.import}</Button>;
             return (
                 <Fragment>
-                    <Button isTertiary onClick={() => setState({isOpen: true})}>{__( 'Import', 'rrze-xliff') }</Button>
+                    <Button isTertiary onClick={() => setState({isOpen: true})}>{rrzeXliffJavaScriptData.import}</Button>
                     {isOpen && (
                         <Modal
-                            title={__( 'Import', 'rrze-xliff') }
+                            title={rrzeXliffJavaScriptData.import}
                             onRequestClose={ () => setState({isOpen: false})}
                         >
                             <input type="file" id="xliff-file" name="xliff-file" accept=".xliff" onChange={(e) => {
@@ -210,7 +209,7 @@ registerPlugin( 'rrze-xliff', {
                 className="rrze-xliff-export-and-import"
             >
                 <div>
-                {__( 'XLIFF:', 'rrze-xliff') } <ExportModal/> <ImportModal/>
+                {rrzeXliffJavaScriptData.xliff} <ExportModal/> <ImportModal/>
                 </div>
             </PluginPostStatusInfo>
         )

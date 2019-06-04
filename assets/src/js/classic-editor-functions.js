@@ -49,7 +49,7 @@ import ally from 'ally.js/ally';
         $(window).off('beforeunload.edit-post');
     });
 
-	// Listen to setup of a TinyMCE instance.
+    // Listen to setup of a TinyMCE instance.
     jQuery(document).on(
         'tinymce-editor-setup',
         function (event, editor) {
@@ -62,20 +62,20 @@ import ally from 'ally.js/ally';
                 {
                     // It is a menubutton.
                     type: 'menubutton',
-                    text: 'XLIFF Export/Import',
+                    text: rrzeXliffJavaScriptData.dropdown_menu_label,
                     icon: false,
 
                     // Add the menu items.
                     menu: [
                     {
-                        text: 'Export',
+                        text: rrzeXliffJavaScriptData.export,
                         onclick: function () {
                             // Show export modal.
                             exportModal();
                         },
                     },
                     {
-                        text: 'Import',
+                        text: rrzeXliffJavaScriptData.import,
                         onclick: function () {
                             // Show import modal.
                             importModal();
@@ -89,9 +89,9 @@ import ally from 'ally.js/ally';
 
     // Export- und Import-Modal bei Klick außerhalb des Modals schließen.
     document.body.addEventListener('click', function (e) {
-		if (document.body.classList.contains('modal-open') && (document.querySelector('.rrze-xliff-export-modal-wrapper').style.display === 'block' || document.querySelector('.rrze-xliff-import-modal-wrapper').style.display === 'block')) {
+        if (document.body.classList.contains('modal-open') && (document.querySelector('.rrze-xliff-export-modal-wrapper').style.display === 'block' || document.querySelector('.rrze-xliff-import-modal-wrapper').style.display === 'block')) {
             if (e.explicitOriginalTarget.classList.contains('components-modal__screen-overlay')) {
-				disabledHandle.disengage();
+                disabledHandle.disengage();
                 tabHandle.disengage();
                 keyHandle.disengage();
                 focusedElementBeforeModal.focus();
@@ -102,12 +102,12 @@ import ally from 'ally.js/ally';
                 if (noticesDiv) {
                     noticesDiv.innerHTML = '';
                 }
-			}
-		}
-	}, false);
+            }
+        }
+    }, false);
     
     let disabledHandle,
-	    tabHandle,
+        tabHandle,
         keyHandle,
         focusedElementBeforeModal;
 

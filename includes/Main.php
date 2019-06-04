@@ -57,7 +57,16 @@ class Main
             wp_enqueue_script('rrze-xliff-block-editor-script');
             
             wp_localize_script('rrze-xliff-block-editor-script', 'rrzeXliffJavaScriptData', [
-                'email_address' => Options::get_options()->rrze_xliff_export_email_address
+                'email_address' => Options::get_options()->rrze_xliff_export_email_address,
+                'export_title' => __('Export post as XLIFF', 'rrze-xliff'),
+                'download' => __('Download XLIFF file', 'rrze-xliff'),
+                'send_via_email' => __( 'Or send the file to an email address:', 'rrze-xliff'),
+                'email_address_label' => __('Email address', 'rrze-xliff'),
+                'email_text_label' => __('Email text', 'rrze-xliff'),
+                'send_email' => __('Send XLIFF file', 'rrze-xliff'),
+                'import' => __('Import', 'rrze-xliff'),
+                'xliff' => __( 'XLIFF:', 'rrze-xliff'),
+                'export' => __('Export', 'rrze-xliff'),
             ]);
 
             wp_set_script_translations('rrze-xliff-block-editor-script', 'rrze-xliff', trailingslashit(RRZE_PLUGIN_PATH) . 'languages');
@@ -80,6 +89,9 @@ class Main
             wp_localize_script('rrze-xliff-classic-editor-script', 'rrzeXliffJavaScriptData', [
                 'post_id' => get_the_ID(),
                 'nonce' => wp_create_nonce('xliff_export'),
+                'dropdown_menu_label' => __('XLIFF Export/Import', 'rrze-xliff'),
+                'export' => __('Export', 'rrze-xliff'),
+                'import' => __('Import', 'rrze-xliff'),
             ]);
 
             wp_enqueue_style('rrze-xliff-classic-editor-style',  plugins_url('assets/dist/css/classic-editor.css', plugin_basename(RRZE_PLUGIN_FILE)), [], null);
