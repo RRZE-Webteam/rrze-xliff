@@ -1,0 +1,198 @@
+# Copyright (C) 2019 RRZE-Webteam
+# This file is distributed under the same license as the XLIFF Export/Import plugin.
+msgid ""
+msgstr ""
+"Project-Id-Version: XLIFF Export/Import 0.1.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/rrze-xliff\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2019-06-04T17:26:52+02:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.2.0\n"
+"X-Domain: rrze-xliff\n"
+
+#. Plugin Name of the plugin
+msgid "XLIFF Export/Import"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://github.com/RRZE-Webteam/rrze-xliff"
+msgstr ""
+
+#. Description of the plugin
+msgid "Ermöglicht Export und Import von XLIFF-Dateien."
+msgstr ""
+
+#. Author of the plugin
+msgid "RRZE-Webteam"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "https://blogs.fau.de/webworking/"
+msgstr ""
+
+#: includes/Export.php:68
+msgid "Bulk XLIFF export"
+msgstr ""
+
+#: includes/Export.php:104
+msgid "No file was found for download or sending."
+msgstr ""
+
+#: includes/Export.php:146
+msgid "XLIFF export"
+msgstr ""
+
+#: includes/Export.php:171
+msgid "The export was sent successfully."
+msgstr ""
+
+#: includes/Export.php:173
+msgid "There was an error sending the export."
+msgstr ""
+
+#: includes/Export.php:187
+msgid "The submitted ID for export does not match a post"
+msgstr ""
+
+#: includes/Export.php:192
+msgid "No source language code set."
+msgstr ""
+
+#: includes/Import.php:52
+msgid "Import successful"
+msgstr ""
+
+#: includes/Import.php:71
+msgid "No content was found for the passed post ID."
+msgstr ""
+
+#: includes/Import.php:77
+msgid "The file was not found."
+msgstr ""
+
+#: includes/Import.php:89
+msgid "The file’s content is no XLIFF."
+msgstr ""
+
+#: includes/Import.php:116
+msgid "An unknown error occurred. The post couldn’t be saved."
+msgstr ""
+
+#: includes/Main.php:142
+#: assets/src/js/block-editor-functions.js:58
+msgid "Export post as XLIFF"
+msgstr ""
+
+#: includes/Main.php:143
+#: includes/Main.php:178
+msgid "Close dialog"
+msgstr ""
+
+#: includes/Main.php:145
+#: assets/src/js/block-editor-functions.js:66
+msgid "Download XLIFF file"
+msgstr ""
+
+#: includes/Main.php:146
+#: assets/src/js/block-editor-functions.js:69
+msgid "Or send the file to an email address:"
+msgstr ""
+
+#: includes/Main.php:147
+#: assets/src/js/block-editor-functions.js:71
+msgid "Email address"
+msgstr ""
+
+#: includes/Main.php:149
+#: assets/src/js/block-editor-functions.js:77
+msgid "Email text"
+msgstr ""
+
+#: includes/Main.php:150
+#: assets/src/js/block-editor-functions.js:88
+msgid "Send XLIFF file"
+msgstr ""
+
+#: includes/Main.php:177
+#: assets/src/js/block-editor-functions.js:183
+#: assets/src/js/block-editor-functions.js:186
+#: assets/src/js/block-editor-functions.js:189
+msgid "Import"
+msgstr ""
+
+#: includes/Main.php:179
+msgid "Choose XLIFF file to import"
+msgstr ""
+
+#: includes/Main.php:180
+msgid "Import XLIFF file"
+msgstr ""
+
+#: includes/Settings.php:53
+msgid "Settings"
+msgstr ""
+
+#: includes/Settings.php:61
+msgid "XLIFF Import/Export"
+msgstr ""
+
+#: includes/Settings.php:72
+msgid "Settings &rsaquo; XLIFF Import/Export"
+msgstr ""
+
+#: includes/Settings.php:100
+msgid "Default email address"
+msgstr ""
+
+#: includes/Settings.php:111
+msgid "Default email subject"
+msgstr ""
+
+#: includes/Settings.php:130
+msgid "Role that a user needs for export and import"
+msgstr ""
+
+#: includes/Settings.php:141
+msgid "Post types to show import/export options for"
+msgstr ""
+
+#: includes/Settings.php:199
+#: assets/src/js/block-editor-functions.js:55
+msgid "Export"
+msgstr ""
+
+#: includes/Settings.php:236
+msgid "General settings"
+msgstr ""
+
+#: includes/Settings.php:291
+msgid "Here comes the Context Help content."
+msgstr ""
+
+#: includes/Settings.php:297
+msgid "Overview"
+msgstr ""
+
+#: includes/Settings.php:301
+msgid "For more information"
+msgstr ""
+
+#: includes/Settings.php:301
+msgid "RRZE Webteam on Github"
+msgstr ""
+
+#: rrze-xliff.php:75
+msgid "The server is running PHP version %1$s. The Plugin requires at least PHP version %2$s."
+msgstr ""
+
+#: rrze-xliff.php:78
+msgid "The server is running WordPress version %1$s. The Plugin requires at least WordPress version %2$s."
+msgstr ""
+
+#: assets/src/js/block-editor-functions.js:213
+msgid "XLIFF:"
+msgstr ""
