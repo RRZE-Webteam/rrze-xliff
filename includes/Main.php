@@ -68,8 +68,6 @@ class Main
                 'xliff' => __( 'XLIFF:', 'rrze-xliff'),
                 'export' => __('Export', 'rrze-xliff'),
             ]);
-
-            wp_set_script_translations('rrze-xliff-block-editor-script', 'rrze-xliff', trailingslashit(RRZE_PLUGIN_PATH) . 'languages');
         }
     }
 
