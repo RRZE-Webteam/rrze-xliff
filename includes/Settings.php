@@ -58,8 +58,7 @@ class Settings
      */
     public function admin_settings_page()
     {
-        $this->admin_settings_page = add_options_page(__('XLIFF Import/Export', 'rrze-xliff'), __('XLIFF Import/Export', 'rrze-xliff'), 'manage_options', 'rrze-xliff', [$this, 'settings_page']);
-        add_action('load-' . $this->admin_settings_page, [$this, 'admin_help_menu']);
+        $this->admin_settings_page = add_options_page(__('XLIFF Export/Import', 'rrze-xliff'), __('XLIFF Export/Import', 'rrze-xliff'), 'manage_options', 'rrze-xliff', [$this, 'settings_page']);
     }
 
     /**
@@ -69,7 +68,7 @@ class Settings
     {
         ?>
         <div class="wrap">
-            <h2><?php echo __('Settings &rsaquo; XLIFF Import/Export', 'rrze-xliff'); ?></h2>
+            <h2><?php echo __('Settings &rsaquo; XLIFF Export/Import', 'rrze-xliff'); ?></h2>
             <form method="post" action="options.php">
             <?php
             settings_fields('rrze_xliff_options');
@@ -138,7 +137,7 @@ class Settings
 
         add_settings_field(
             'rrze_xliff_export_import_post_types',
-            __('Post types to show import/export options for', 'rrze-xliff'),
+            __('Post types to show Export/Import options for', 'rrze-xliff'),
             [$this, 'rrze_xliff_export_import_post_types'],
             'rrze_xliff_options',
             'rrze_xliff_section_general'
@@ -279,35 +278,5 @@ class Settings
             );
         }
         echo $post_type_options;        
-    }
-
-    /**
-     * Erstellt die Kontexthilfe der Einstellungsseite.
-     * @return void
-     */
-    public function admin_help_menu()
-    {
-        $content = [
-            '<p>' . __('Here comes the Context Help content.', 'rrze-xliff') . '</p>',
-        ];
-
-
-        $help_tab = [
-            'id' => $this->admin_settings_page,
-            'title' => __('Overview', 'rrze-xliff'),
-            'content' => implode(PHP_EOL, $content),
-        ];
-
-        $help_sidebar = sprintf('<p><strong>%1$s:</strong></p><p><a href="http://blogs.fau.de/webworking">RRZE-Webworking</a></p><p><a href="https://github.com/RRZE-Webteam">%2$s</a></p>', __('For more information', 'rrze-xliff'), __('RRZE Webteam on Github', 'rrze-xliff'));
-
-        $screen = get_current_screen();
-
-        if ($screen->id != $this->admin_settings_page) {
-            return;
-        }
-
-        $screen->add_help_tab($help_tab);
-
-        $screen->set_help_sidebar($help_sidebar);
     }
 }
