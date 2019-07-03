@@ -19,29 +19,30 @@ class Main
         $this->helpers = new Helpers();
         new Notices();
 
-        add_action('wp_enqueue_scripts', [$this, 'enqueue_scripts']);
-
         add_action('enqueue_block_editor_assets', [$this, 'enqueue_block_editor_script']);
+        
+        add_action('current_screen', function ($screen) {
+            if ($screen->base != 'post' && $screen->id != "edit-$screen->post_type") {
+                return;
+            }
 
-        // Classic-Editor-Script einbinden.
-        add_action('current_screen', function($screen) {
-            if (! $screen->is_block_editor) {
+            if (! $this->helpers->is_user_capable()) {
+                return;
+            }
+
+            $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
+            if (! in_array($screen->post_type, $post_types)) {
+                return;
+            }
+
+            if ($screen->base == 'post' && ! $screen->is_block_editor) {
                 add_action('admin_enqueue_scripts', [$this, 'enqueue_classic_editor_script']);
                 add_action('admin_footer', [$this, 'classic_editor_xliff_templates']);
                 add_action('edit_form_top', [$this, 'classic_editor_nonce_field']);
+            } elseif ($screen->id == "edit-$screen->post_type") {
+                add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
             }
         });
-
-        // Script für Bulk-Export einbinden.
-        add_action('admin_enqueue_scripts', [$this, 'enqueue_bulk_export_script']);
-    }
-
-    /**
-     * Enqueue der Skripte und Stylesheets.
-     */
-    public function enqueue_scripts()
-    {
-        wp_register_style('rrze-xliff', plugins_url('assets/css/rrze-xliff.min.css', plugin_basename(RRZE_PLUGIN_FILE)));
     }
 
     /**
@@ -49,26 +50,20 @@ class Main
      */
     public function enqueue_block_editor_script()
     {
-        $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
-        $current_post_type = get_post_type();
-        if ($this->helpers->is_user_capable() && in_array($current_post_type, $post_types)) {
-            wp_register_script('rrze-xliff-block-editor-script', plugins_url('assets/dist/js/block-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), ['wp-plugins', 'wp-element', 'wp-edit-post', 'wp-block-serialization-default-parser', 'wp-i18n']);
-
-            wp_enqueue_script('rrze-xliff-block-editor-script');
-            
-            wp_localize_script('rrze-xliff-block-editor-script', 'rrzeXliffJavaScriptData', [
-                'email_address' => Options::get_options()->rrze_xliff_export_email_address,
-                'export_title' => __('Export post as XLIFF', 'rrze-xliff'),
-                'download' => __('Download XLIFF file', 'rrze-xliff'),
-                'send_via_email' => __( 'Or send the file to an email address:', 'rrze-xliff'),
-                'email_address_label' => __('Email address', 'rrze-xliff'),
-                'email_text_label' => __('Email text', 'rrze-xliff'),
-                'send_email' => __('Send XLIFF file', 'rrze-xliff'),
-                'import' => __('Import', 'rrze-xliff'),
-                'xliff' => __( 'XLIFF:', 'rrze-xliff'),
-                'export' => __('Export', 'rrze-xliff'),
-            ]);
-        }
+        wp_register_script('rrze-xliff-block-editor-script', plugins_url('assets/dist/js/block-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), ['wp-plugins', 'wp-element', 'wp-edit-post', 'wp-block-serialization-default-parser', 'wp-i18n']);
+        wp_localize_script('rrze-xliff-block-editor-script', 'rrzeXliffJavaScriptData', [
+            'email_address' => Options::get_options()->rrze_xliff_export_email_address,
+            'export_title' => __('Export post as XLIFF', 'rrze-xliff'),
+            'download' => __('Download XLIFF file', 'rrze-xliff'),
+            'send_via_email' => __('Or send the file to an email address:', 'rrze-xliff'),
+            'email_address_label' => __('Email address', 'rrze-xliff'),
+            'email_text_label' => __('Email text', 'rrze-xliff'),
+            'send_email' => __('Send XLIFF file', 'rrze-xliff'),
+            'import' => __('Import', 'rrze-xliff'),
+            'xliff' => __('XLIFF:', 'rrze-xliff'),
+            'export' => __('Export', 'rrze-xliff'),
+        ]);
+        wp_enqueue_script('rrze-xliff-block-editor-script');
     }
 
     /**
@@ -76,45 +71,31 @@ class Main
      */
     public function enqueue_classic_editor_script()
     {
-        $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
-        $current_post_type = get_post_type();
-        global $current_screen;
-        if ($this->helpers->is_user_capable() && in_array($current_post_type, $post_types) && in_array($current_screen->id, $post_types)) {
-            wp_register_script('rrze-xliff-classic-editor-script', plugins_url('assets/dist/js/classic-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], null, true);
+        wp_enqueue_style('rrze-xliff-classic-editor-style', plugins_url('assets/dist/css/classic-editor.css', plugin_basename(RRZE_PLUGIN_FILE)), [], null);
 
-            wp_enqueue_script('rrze-xliff-classic-editor-script');
-            
-            wp_localize_script('rrze-xliff-classic-editor-script', 'rrzeXliffJavaScriptData', [
-                'post_id' => get_the_ID(),
-                'nonce' => wp_create_nonce('xliff_export'),
-                'dropdown_menu_label' => __('XLIFF Export/Import', 'rrze-xliff'),
-                'export' => __('Export', 'rrze-xliff'),
-                'import' => __('Import', 'rrze-xliff'),
-            ]);
-
-            wp_enqueue_style('rrze-xliff-classic-editor-style',  plugins_url('assets/dist/css/classic-editor.css', plugin_basename(RRZE_PLUGIN_FILE)), [], null);
-        }
+        wp_register_script('rrze-xliff-classic-editor-script', plugins_url('assets/dist/js/classic-editor-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], null, true);
+        wp_localize_script('rrze-xliff-classic-editor-script', 'rrzeXliffJavaScriptData', [
+            'post_id' => get_the_ID(),
+            'nonce' => wp_create_nonce('xliff_export'),
+            'dropdown_menu_label' => __('XLIFF Export/Import', 'rrze-xliff'),
+            'export' => __('Export', 'rrze-xliff'),
+            'import' => __('Import', 'rrze-xliff'),
+        ]);
+        wp_enqueue_script('rrze-xliff-classic-editor-script');
     }
-    
+
     /**
      * Einbinden des Skripts für den Bulk-Export.
      */
     public function enqueue_bulk_export_script()
     {
-        if ($this->helpers->is_user_capable()) {
-            global $current_screen;
-            $post_types = Options::get_options()->rrze_xliff_export_import_post_types;
-            $post_type = $current_screen->post_type;
-            if (in_array($post_type, $post_types) && $current_screen->id === "edit-$current_screen->post_type") {
-                wp_enqueue_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
-            
-                wp_localize_script('rrze-xliff-bulk-export', 'rrzeXliffJavaScriptData', [
-                    'email_address' => Options::get_options()->rrze_xliff_export_email_address
-                ]);
-            }
-        }
+        wp_register_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
+        wp_localize_script('rrze-xliff-bulk-export', 'rrzeXliffJavaScriptData', [
+            'email_address' => Options::get_options()->rrze_xliff_export_email_address
+        ]);
+        wp_enqueue_script('rrze-xliff-bulk-export');
     }
-    
+
     /**
      * HTML-Templates für Import und Export, die im Classic Editor genutzt werden.
      */
@@ -143,7 +124,7 @@ class Main
                                     <textarea name="xliff_export_email_note" id="xliff_export_email_note" style="width: 100%%;"></textarea>
                                 </p>
                                 <div class="xliff-export-notices">
-                    
+
                                 </div>
                                 <p><button class="button" id="xliff-export-email-address-link">%s</button></p>
                             </div>
@@ -196,7 +177,8 @@ class Main
     /**
      * Nonce für Import-Aktion ausgeben.
      */
-    public function classic_editor_nonce_field() {
+    public function classic_editor_nonce_field()
+    {
         wp_nonce_field('rrze-xliff/includes/Main', 'rrze_xliff_file_import_nonce');
     }
 }
