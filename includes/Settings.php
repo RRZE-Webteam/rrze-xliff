@@ -27,12 +27,20 @@ class Settings
     protected $admin_settings_page;
 
     /**
+     * [protected description]
+     * @var object
+     */
+    protected $helpers;
+
+    /**
      * Settings-Klasse wird instanziiert.
      */
     public function __construct()
     {
         $this->option_name = Options::get_option_name();
         $this->options = Options::get_options();
+
+        $this->helpers = new Helpers();
 
         add_action('admin_menu', [$this, 'admin_settings_page']);
         add_action('admin_init', [$this, 'admin_settings']);
@@ -70,11 +78,9 @@ class Settings
         <div class="wrap">
             <h2><?php echo __('Settings &rsaquo; XLIFF Export/Import', 'rrze-xliff'); ?></h2>
             <form method="post" action="options.php">
-            <?php
-            settings_fields('rrze_xliff_options');
-            do_settings_sections('rrze_xliff_options');
-            submit_button();
-            ?>
+            <?php settings_fields('rrze_xliff_options'); ?>
+            <?php do_settings_sections('rrze_xliff_options'); ?>
+            <?php submit_button(); ?>
             </form>
         </div>
         <?php
@@ -116,7 +122,7 @@ class Settings
                 'description' => __('You can use the following template tags: %%POST_ID%%, %%POST_TITLE%%')
             ]
         );
-        
+
         add_settings_section(
             'rrze_xliff_section_general',
             false,
@@ -166,19 +172,19 @@ class Settings
                 $input['rrze_xliff_export_import_post_types'] = Options::get_default_options()->rrze_xliff_export_import_post_types;
             }
         }
-        
+
         // Prüfen, ob die Benutzerrolle gültig ist.
         $selected_role = $input['rrze_xliff_export_import_role'];
         if (get_role($selected_role) === null) {
             $input['rrze_xliff_export_import_role'] = Options::get_default_options()->rrze_xliff_export_import_role;
         }
-        
+
         // Prüfen, ob E-Mail-Adresse angegeben wurde.
         $email_address = $input['rrze_xliff_export_email_address'];
         if ($email_address === '' || filter_var($email_address, FILTER_VALIDATE_EMAIL) === false) {
             $input['rrze_xliff_export_email_address'] = Options::get_default_options()->rrze_xliff_export_email_address;
         }
-        
+
         // Prüfen, ob E-Mail-Betreff angegeben wurde.
         $email_subject = $input['rrze_xliff_export_email_subject'];
         if ($email_subject === '') {
@@ -187,7 +193,7 @@ class Settings
 
         return $input;
     }
-    
+
     /**
      * Header für den Export-Bereich der Einstellungen.
      */
@@ -217,14 +223,15 @@ class Settings
         ?>
         <input type='text' name="<?php printf('%s[rrze_xliff_export_email_subject]', $this->option_name); ?>" id="<?php printf('%s[rrze_xliff_export_email_subject]', $this->option_name); ?>" value="<?php echo $this->options->rrze_xliff_export_email_subject; ?>">
         <?php
-        if ('' !== $args['description']) { ?>
+        if ('' !== $args['description']) {
+            ?>
             <p class="description">
                 <?php echo $args['description']; ?>
             </p>
             <?php
         }
     }
-    
+
     /**
      * Header für den Allgemein-Bereich der Einstellungen.
      */
@@ -241,14 +248,15 @@ class Settings
      */
     public function rrze_xliff_export_import_role()
     {
-        $roles = get_editable_roles();
+        global $wp_roles;
+        $allowed_roles = $this->helpers->allowed_roles();
         $role_option_elements = '';
-        foreach ($roles as $role_slug => $role_array) {
+        foreach (array_keys($allowed_roles) as $role) {
             $role_option_elements .= sprintf(
                 '<option value="%s" %s>%s</option>',
-                $role_slug,
-                $this->options->rrze_xliff_export_import_role === $role_slug ? 'selected' : '',
-                $role_array['name']
+                $role,
+                $this->options->rrze_xliff_export_import_role === $role ? 'selected' : '',
+                translate_user_role($wp_roles->roles[$role]['name'])
             );
         }
         printf(
@@ -277,6 +285,6 @@ class Settings
                 in_array($post_type->name, $saved_settings) ? 'checked' : ''
             );
         }
-        echo $post_type_options;        
+        echo $post_type_options;
     }
 }
