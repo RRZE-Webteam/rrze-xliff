@@ -23,8 +23,12 @@ class Helpers
      */
     public function is_user_capable()
     {
-        if (current_user_can($this->options->rrze_xliff_export_import_role)) {
-            return true;
+        $current_user = wp_get_current_user();
+        if ($current_user->ID) {
+            $allowed_roles = [$this->options->rrze_xliff_export_import_role];
+            if (array_intersect($allowed_roles, $current_user->roles)) {
+                return true;
+            }
         }
         return false;
     }
