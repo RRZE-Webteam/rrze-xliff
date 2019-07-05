@@ -23,13 +23,23 @@ class Helpers
      */
     public function is_user_capable()
     {
-        $current_user = wp_get_current_user();
-        if ($current_user->ID) {
-            $allowed_roles = [$this->options->rrze_xliff_export_import_role];
-            if (array_intersect($allowed_roles, $current_user->roles)) {
-                return true;
-            }
+        $allowed_roles = $this->allowed_roles();
+        if (isset($allowed_roles[$this->options->rrze_xliff_export_import_role])
+            && current_user_can($allowed_roles[$this->options->rrze_xliff_export_import_role])) {
+            return true;
         }
         return false;
+    }
+
+    /**
+     * Zugelassene Rollen
+     * @return array [description]
+     */
+    public function allowed_roles() {
+        return [
+            'administrator' => 'manage_options',
+            'editor' => 'manage_categories',
+            'author' => 'upload_files'
+        ];
     }
 }
