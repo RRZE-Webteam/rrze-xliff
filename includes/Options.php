@@ -22,7 +22,8 @@ class Options
             'rrze_xliff_export_email_address' => get_option('admin_email'),
             'rrze_xliff_export_email_subject' => 'XLIFF-Export',
             'rrze_xliff_export_import_role' => 'editor',
-            'rrze_xliff_export_import_post_types' => ['post', 'page'],
+			'rrze_xliff_export_import_post_types' => ['post', 'page'],
+			'rrze_xliff_export_xliff_version' => '2',
         ];
 
         return $options;

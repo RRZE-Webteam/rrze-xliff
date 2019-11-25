@@ -30,7 +30,13 @@ class Settings
      * [protected description]
      * @var object
      */
-    protected $helpers;
+	protected $helpers;
+	
+	/**
+	 * Mögliche XLIFF-Versionen für die XLIFF-Version-Option und deren Validierung.
+	 * @var array
+	 */
+	protected $xliff_versions;
 
     /**
      * Settings-Klasse wird instanziiert.
@@ -40,7 +46,18 @@ class Settings
         $this->option_name = Options::get_option_name();
         $this->options = Options::get_options();
 
-        $this->helpers = new Helpers();
+		$this->helpers = new Helpers();
+		
+		$this->xliff_versions = [
+			[
+				'label' => __('XLIFF 1', 'rrze-xliff'),
+				'value' => '1',
+			],
+			[
+				'label' => __('XLIFF 2', 'rrze-xliff'),
+				'value' => '2',
+			]
+		];
 
         add_action('admin_menu', [$this, 'admin_settings_page']);
         add_action('admin_init', [$this, 'admin_settings']);
@@ -148,6 +165,14 @@ class Settings
             'rrze_xliff_options',
             'rrze_xliff_section_general'
         );
+
+        add_settings_field(
+            'rrze_xliff_export_xliff_version',
+            __('XLIFF Version', 'rrze-xliff'),
+            [$this, 'rrze_xliff_export_xliff_version'],
+            'rrze_xliff_options',
+            'rrze_xliff_section_general'
+        );
     }
 
     /**
@@ -189,6 +214,19 @@ class Settings
         $email_subject = $input['rrze_xliff_export_email_subject'];
         if ($email_subject === '') {
             $input['rrze_xliff_export_email_subject'] = Options::get_default_options()->rrze_xliff_export_email_subject;
+        }
+
+        // Prüfen, ob eine gültige XLIFF-Version angegeben wurde.
+		$xliff_version = $input['rrze_xliff_export_xliff_version'];
+		$valid_xliff_version = false;
+		foreach ($this->xliff_versions as $valid_version) {
+			if ($xliff_version === $valid_version['value']) {
+				$valid_xliff_version = true;
+				continue;
+			}
+		}
+        if ($valid_xliff_version === false) {
+            $input['rrze_xliff_export_xliff_version'] = Options::get_default_options()->rrze_xliff_export_xliff_version;
         }
 
         return $input;
@@ -286,5 +324,36 @@ class Settings
             );
         }
         echo $post_type_options;
+    }
+
+    /**
+     * Feld für unterstützte Post-Types.
+     */
+    public function rrze_xliff_export_xliff_version()
+    {
+		$saved_setting = $this->options->rrze_xliff_export_xliff_version;
+		$versions = [
+			[
+				'label' => __('XLIFF 1', 'rrze-xliff'),
+				'value' => '1',
+			],
+			[
+				'label' => __('XLIFF 2', 'rrze-xliff'),
+				'value' => '2',
+			]
+		];
+		$xliff_version_options = '';
+		foreach ($this->xliff_versions as $version) {
+            $xliff_version_options .= sprintf(
+                '<p><input type="radio" value="%1$s" name="%2$s" id="%3$s" %5$s><label for="%3$s">%4$s</label></p>',
+                $version['value'],
+                sprintf('%s[rrze_xliff_export_xliff_version]', $this->option_name),
+                sprintf('rrze-xliff-export-xliff-version-%s', $version['value']),
+                $version['label'],
+                $saved_setting === $version['value'] ? 'checked' : ''
+            );
+		}
+		
+		echo $xliff_version_options;
     }
 }

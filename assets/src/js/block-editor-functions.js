@@ -6,7 +6,8 @@ const {
     TextareaControl,
     Modal,
     Disabled,
-    Notice
+	Notice,
+	SelectControl
 } = wp.components;
 const {withState} = wp.compose;
 const {Fragment} = wp.element;
@@ -14,15 +15,17 @@ const {Fragment} = wp.element;
 registerPlugin( 'rrze-xliff', {
     render: () => {
         const currentUrl = window.location;
-        const postId = new URL(currentUrl).searchParams.get('post');
-        const xliffExportUrl = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}`;
-        let defaultEmailAdress = rrzeXliffJavaScriptData !== undefined && rrzeXliffJavaScriptData.email_address ? rrzeXliffJavaScriptData.email_address : '';
+		const postId = new URL(currentUrl).searchParams.get('post');
+		const langCodes = rrzeXliffJavaScriptData !== undefined && rrzeXliffJavaScriptData.lang_codes ? rrzeXliffJavaScriptData.lang_codes : [];
+        let xliffExportUrl = `${currentUrl.protocol}//${currentUrl.host}${currentUrl.pathname}?xliff-export=${postId}`;
+        let defaultEmailAdress = rrzeXliffJavaScriptData !== undefined && rrzeXliffJavaScriptData.email_address ? rrzeXliffJavaScriptData.email_address : 'de';
 
         const ExportModal = withState({
             isOpen: false,
             emailAddress: defaultEmailAdress,
-            emailNote: ''
-        })(({isOpen, emailAddress, emailNote, setState}) => {
+			emailNote: '',
+			xliffTargetLangCode: rrzeXliffJavaScriptData !== undefined && rrzeXliffJavaScriptData.default_target_lang_code ? rrzeXliffJavaScriptData.default_target_lang_code : ''
+        })(({isOpen, emailAddress, emailNote, xliffTargetLangCode, setState}) => {
 
             function runExport(emailAddress, emailNote) {
                 let xhr = new XMLHttpRequest(),
@@ -47,7 +50,7 @@ registerPlugin( 'rrze-xliff', {
                     }
                 }
                 emailNote = emailNote.replace(/(\r\n|[\r\n])/g, "<br>");
-                xhr.send(`_nonce=${postId}&action=xliff_email_export&xliff_export_post=${postId}&xliff_export_email_address=${emailAddress}&email_export_note=${emailNote}`);
+                xhr.send(`_nonce=${postId}&action=xliff_email_export&xliff_export_post=${postId}&xliff_export_email_address=${emailAddress}&email_export_note=${emailNote}&xliff_target_lang_code=${xliffTargetLangCode}`);
             }
             return (
                 <Fragment>
@@ -57,9 +60,17 @@ registerPlugin( 'rrze-xliff', {
                             title={rrzeXliffJavaScriptData.export_title}
                             onRequestClose={() => setState({isOpen: false})}
                         >
+							{langCodes.length > 0 && (
+								<SelectControl
+									label={rrzeXliffJavaScriptData.lang_code_label}
+									value={xliffTargetLangCode}
+									options={langCodes}
+									onChange={(xliffTargetLangCode) => {setState({xliffTargetLangCode})}}
+								/>
+							)}
                             <p>
                                 <Button
-                                    href={xliffExportUrl}
+                                    href={`${xliffExportUrl}&xliff_target_lang_code=${xliffTargetLangCode}`}
                                     isDefault={true}
                                 >
                                     {rrzeXliffJavaScriptData.download}
