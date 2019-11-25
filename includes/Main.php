@@ -139,7 +139,7 @@ class Main
 			foreach ($this->lang_codes as $lang_code) {
 				$target_lang_select .= sprintf(
 					'<option value="%s" %s>%s</option>',
-					$lang_code,
+					$lang_code['value'],
 					strpos(\get_bloginfo('language'), 'de') === 0 && $lang_code['value'] === 'en' ? 'selected="selected"' : '',
 					$lang_code['label']
 				);

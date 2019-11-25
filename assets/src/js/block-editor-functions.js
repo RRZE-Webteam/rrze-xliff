@@ -12,6 +12,10 @@ const {
 const {withState} = wp.compose;
 const {Fragment} = wp.element;
 
+// External dependencies.
+import shim from 'string.prototype.matchall/shim';
+shim();
+
 registerPlugin( 'rrze-xliff', {
     render: () => {
         const currentUrl = window.location;
@@ -109,70 +113,70 @@ registerPlugin( 'rrze-xliff', {
 
             // Funktion, die nach Auslesen der Datei ausgeführt wird.
             reader.onload = (xliffString) => {
-                let oParser = new DOMParser(),
-                    oDOM = oParser.parseFromString(xliffString.target.result, 'application/xml'),
-                    submitButton = document.querySelector('#xliff-import-button'),
-                    title,
-                    content,
-                    metaValues = {};
+				let title,
+					contentHtml,
+					content,
+					metaMatches;
+				// Prüfen, ob wir XLIFF 1 oder XLIFF 2 vorliegen haben.
+				if (xliffString.target.result.match(/<xliff ([^>]*)version="2\.0"([^>]*)>/) !== null) {
+					// Wir haben XLIFF 2.
 
-                submitButton.removeAttribute('hidden');
+					// Titel des Beitrags holen.
+					title = xliffString.target.result.match(/<unit id="title">(?:(?:.|\s)*?)<target>(?<title>(.|\s)*?)<\/target>/m);
+					title = title !== null ? title['groups'].title : '';
 
-                // Die Knoten der XLIFF-Datei durchlaufen und die Strings zusammensetzen, die
-                // in den Editor kommen.
-                for (let xliffNode of oDOM.childNodes) {
-                    if (xliffNode.nodeName === 'xliff') {
-                        for (let childNode of xliffNode.childNodes) {
-                            if (childNode.nodeName === 'file') {
-                                for (let fileChild of childNode.childNodes) {
-                                    if (fileChild.nodeName === 'unit') {
-                                        if (fileChild.id === 'title') {
-                                            for (let titleNodes of fileChild.childNodes) {
-                                                if (titleNodes.nodeName === 'segment') {
-                                                    for (let titleNodeSegment of titleNodes.childNodes) {
-                                                        if (titleNodeSegment.nodeName === 'target') {
-                                                            title = titleNodeSegment.textContent;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else if (fileChild.id === 'body') {
-                                            for (let bodyNodes of fileChild.childNodes) {
-                                                if (bodyNodes.nodeName === 'segment') {
-                                                    for (let bodyNodeSegment of bodyNodes.childNodes) {
-                                                        if (bodyNodeSegment.nodeName === 'target') {
-                                                            content = bodyNodeSegment.textContent;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        } else if (fileChild.id.indexOf('_meta_') === 0) {
-                                            for (let metaNodes of fileChild.childNodes) {
-                                                if (metaNodes.nodeName === 'segment') {
-                                                    for (let metaNodesegment of metaNodes.childNodes) {
-                                                        if (metaNodesegment.nodeName === 'target') {
-                                                            metaValues = Object.assign(metaValues, {[`${fileChild.id.replace('_meta_', '')}`]: metaNodesegment.textContent})
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }    
-                }
+					// Inhaltsbereich aus der XLIFF-Datei holen.
+					contentHtml = xliffString.target.result.match(/<unit id="body">(?:(?:.|\s)*?)<target>(?<content>(.|\s)*?)<\/target>/m);
+					content = contentHtml !== null ? contentHtml['groups'].content : '';
+
+					// Metawerte holen.
+					metaMatches = [...xliffString.target.result.matchAll(/<unit id="_meta_(?<metaKey>(?:.*))">(?:(?:.|\s)*?)<target>(?<metaValue>(.|\s)*?)<\/target>/mg)];
+				} else {
+					// Wir haben XLIFF 1.
+
+					// Titel des Beitrags holen.
+					title = xliffString.target.result.match(/<trans-unit ([^>]*)id="title">(?:(?:.|\s)*?)<target>(?<title>(.|\s)*?)<\/target>/m);
+					title = title !== null ? title['groups'].title : '';
+
+					// Inhaltsbereich aus der XLIFF-Datei holen.
+					contentHtml = xliffString.target.result.match(/<trans-unit ([^>]*)id="body">(?:(?:.|\s)*?)<target>(?<content>(.|\s)*?)<\/target>/m);
+					content = contentHtml !== null ? contentHtml['groups'].content : '';
+
+					// <br class="xliff-newline" /> entfernen.
+					content = content.replace(/<br ([^>]*)class="xliff-newline"([^>]*)\/>/gm, '');
+
+					// Metawerte holen.
+					metaMatches = [...xliffString.target.result.matchAll(/<trans-unit ([^>]*)id="_meta_(?<metaKey>(?:.*))">(?:(?:.|\s)*?)<target>(?<metaValue>(.|\s)*?)<\/target>/mg)];
+				}
+
+				// CDATA entfernen.
+				const cdataRegex = /^<!\[CDATA\[(.*)]]>$/mg;
+				title = title.replace(cdataRegex, '$1');
+				content = content.replace(cdataRegex, '$1');
+
+				let submitButton = document.querySelector('#xliff-import-button'),
+					metaValues = {};
+					
+
+				submitButton.removeAttribute('hidden');
+
+				// Objekt aus Metawerten bauen.
+				if (metaMatches.length > 0) {
+					for (let i = 0; i < metaMatches.length; i++) {
+						const metaMatch = metaMatches[i];
+						metaValues = Object.assign(metaValues, {[metaMatch.groups.metaKey]: metaMatch.groups.metaValue.replace(cdataRegex, '$1')})
+					}
+				}
 
                 submitButton.addEventListener('click', function(e) {
                     // Das HTML des Beitragsinhalts aus der XLIFF-Datei in Blöcke parsen.
                     content = wp.blocks.parse(content);
                     // Die alten Blöcke aus dem Editor löschen.
                     // @link https://wordpress.stackexchange.com/a/305935.
-                    wp.data.dispatch('core/editor').resetBlocks([]);
+                    wp.data.dispatch('core/block-editor').resetBlocks([]);
 
                     // Content-Blöcke einfügen und Titel aktualisieren.
-                    wp.data.dispatch('core/editor').insertBlocks(content);
+                    wp.data.dispatch('core/block-editor').insertBlocks(content);
                     wp.data.dispatch('core/editor').editPost({title});
 
                     // Update post meta.
@@ -190,7 +194,7 @@ registerPlugin( 'rrze-xliff', {
             isOpen: false,
             hasFile: false,
         } )( ( { isOpen, hasFile, setState } ) => {
-            let button = <Button isDefault id="xliff-import-button" onClick={() => setState({isOpen: false})} hidden="true">{rrzeXliffJavaScriptData.import}</Button>;
+            let button = <Button isDefault id="xliff-import-button" onClick={() => setState({isOpen: false})} hidden>{rrzeXliffJavaScriptData.import}</Button>;
             return (
                 <Fragment>
                     <Button isTertiary onClick={() => setState({isOpen: true})}>{rrzeXliffJavaScriptData.import}</Button>
@@ -207,9 +211,7 @@ registerPlugin( 'rrze-xliff', {
                                         setState({hasFile: false})
                                     }
                                 }}/>
-                            <p>
-                                {!hasFile ? <Disabled>{button}</Disabled> : button}
-                            </p>
+							{!hasFile ? <Disabled>{button}</Disabled> : button}
                         </Modal>
                     )}
                 </Fragment>

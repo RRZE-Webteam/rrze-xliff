@@ -93,19 +93,38 @@ class Import
             'ID' => $post_id,
         ];
 
-        $post_meta_array = [];
+		$post_meta_array = [];
+		
+		// XLIFF-Version überprüfen.
+		$is_xliff_1 = false;
+		if (preg_match('/<xliff ([^>]*)version="2\.0"([^>]*)>/', $data) === 1) {
+			// Wir haben XLIFF 2.
+			$units = $xml->file->unit;
+		} else {
+			// Wir haben XLIFF 1.
+			$is_xliff_1 = true;
+			$units = $xml->file->body->{"trans-unit"};
+		}
 
-        foreach ($xml->file->unit as $unit) {
-            $attr = $unit->attributes();
-            if ((string) $attr['id'] === 'title') {
-                $post_array['post_title'] = (string) $unit->segment->target;
+        foreach ($units as $unit) {
+			$attr = $unit->attributes();
+			if ($is_xliff_1) {
+				$target = (string) $unit->target;
+				// <br class="xliff-newline" /> entfernen.
+				$target = preg_replace('/<br ([^>]*)class="xliff-newline"([^>]*)\/>/', '', $target);
+			} else {
+				$target = (string) $unit->segment->target;
+			}
+
+			if ((string) $attr['id'] === 'title') {
+                $post_array['post_title'] = $target;
             } elseif ((string) $attr['id'] === 'body') {
-                $post_array['post_content'] = (string) $unit->segment->target;
+                $post_array['post_content'] = $target;
             } elseif ((string) $attr['id'] === 'excerpt') {
                 $post_array['post_excerpt'] = (string) $node->target;
             } elseif (strpos((string) $attr['id'], '_meta_') === 0) {
                 $meta_key = (string) substr((string) $attr['id'], strlen('_meta_'));
-                $meta_value = (string) $unit->segment->target;
+                $meta_value = $target;
                 if (!empty($meta_value) && !is_numeric($meta_value)) {
                     $post_meta_array[$meta_key] = $meta_value;
                 } 
