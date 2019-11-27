@@ -123,7 +123,10 @@ class Main
     {
         wp_register_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
         wp_localize_script('rrze-xliff-bulk-export', 'rrzeXliffJavaScriptData', [
-            'email_address' => Options::get_options()->rrze_xliff_export_email_address
+			'email_address' => Options::get_options()->rrze_xliff_export_email_address,
+			'lang_code_label' => __('Target language', 'rrze-xliff'),
+			'default_target_lang_code' => strpos(\get_bloginfo('language'), 'de') === 0 ? 'en' : 'de',
+			'lang_codes' => Options::get_options()->rrze_xliff_export_xliff_version === '1' ? $this->lang_codes : [], // Das Array mit den Sprach-Codes wird nur für die XLIFF-1-Version eingefügt.
         ]);
         wp_enqueue_script('rrze-xliff-bulk-export');
     }
