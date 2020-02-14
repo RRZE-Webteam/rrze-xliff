@@ -4,7 +4,7 @@
 Plugin Name:     XLIFF Export/Import
 Plugin URI:      https://github.com/RRZE-Webteam/rrze-xliff
 Description:     Ermöglicht Export und Import von XLIFF-Dateien.
-Version:         1.0.3
+Version:         1.1.0
 Author:          RRZE-Webteam
 Author URI:      https://blogs.fau.de/webworking/
 License:         GNU General Public License v2
@@ -25,8 +25,8 @@ was zu unerwartetem Verhalten führen kann.
 */
 defined('ABSPATH') || exit;
 
-const RRZE_PHP_VERSION = '7.1';
-const RRZE_WP_VERSION = '5.2';
+const RRZE_PHP_VERSION = '7.4';
+const RRZE_WP_VERSION = '5.3';
 
 const RRZE_PLUGIN_FILE = __FILE__;
 const RRZE_PLUGIN_PATH = __DIR__;

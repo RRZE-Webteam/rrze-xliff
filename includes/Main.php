@@ -6,13 +6,42 @@ defined('ABSPATH') || exit;
 
 class Main
 {
-    protected $helpers;
+	protected $helpers;
+	
+	protected $lang_codes;
 
     /**
      * Main-Klasse wird instanziiert.
      */
     public function __construct()
     {
+		$this->lang_codes = [
+			[
+				'label' => __('German','rrze-xliff'),
+				'value' => 'de',
+			],
+			[
+				'label' => __('English','rrze-xliff'),
+				'value' => 'en',
+			],
+			[
+				'label' => __('Spanish','rrze-xliff'),
+				'value' => 'es',
+			],
+			[
+				'label' => __('French','rrze-xliff'),
+				'value' => 'fr',
+			],
+			[
+				'label' => __('Chinese','rrze-xliff'),
+				'value' => 'zh',
+			],
+			[
+				'label' => __('Russian','rrze-xliff'),
+				'value' => 'ru',
+			],
+		];
+
         new Settings();
         new Export();
         new Import();
@@ -61,7 +90,10 @@ class Main
             'send_email' => __('Send XLIFF file', 'rrze-xliff'),
             'import' => __('Import', 'rrze-xliff'),
             'xliff' => __('XLIFF:', 'rrze-xliff'),
-            'export' => __('Export', 'rrze-xliff'),
+			'export' => __('Export', 'rrze-xliff'),
+			'lang_code_label' => __('Target language', 'rrze-xliff'),
+			'default_target_lang_code' => strpos(\get_bloginfo('language'), 'de') === 0 ? 'en' : 'de',
+			'lang_codes' => Options::get_options()->rrze_xliff_export_xliff_version === '1' ? $this->lang_codes : [], // Das Array mit den Sprach-Codes wird nur für die XLIFF-1-Version eingefügt.
         ]);
         wp_enqueue_script('rrze-xliff-block-editor-script');
     }
@@ -91,7 +123,10 @@ class Main
     {
         wp_register_script('rrze-xliff-bulk-export', plugins_url('assets/dist/js/bulk-export-functions.js', plugin_basename(RRZE_PLUGIN_FILE)), [], false, true);
         wp_localize_script('rrze-xliff-bulk-export', 'rrzeXliffJavaScriptData', [
-            'email_address' => Options::get_options()->rrze_xliff_export_email_address
+			'email_address' => Options::get_options()->rrze_xliff_export_email_address,
+			'lang_code_label' => __('Target language', 'rrze-xliff'),
+			'default_target_lang_code' => strpos(\get_bloginfo('language'), 'de') === 0 ? 'en' : 'de',
+			'lang_codes' => Options::get_options()->rrze_xliff_export_xliff_version === '1' ? $this->lang_codes : [], // Das Array mit den Sprach-Codes wird nur für die XLIFF-1-Version eingefügt.
         ]);
         wp_enqueue_script('rrze-xliff-bulk-export');
     }
@@ -101,6 +136,27 @@ class Main
      */
     public function classic_editor_xliff_templates()
     {
+		// Das select-Element für die Zielsprache erstellen.
+		$target_lang_select = '';
+		if (is_array($this->lang_codes)) {
+			foreach ($this->lang_codes as $lang_code) {
+				$target_lang_select .= sprintf(
+					'<option value="%s" %s>%s</option>',
+					$lang_code['value'],
+					strpos(\get_bloginfo('language'), 'de') === 0 && $lang_code['value'] === 'en' ? 'selected="selected"' : '',
+					$lang_code['label']
+				);
+			}
+		}
+
+		if ($target_lang_select !== '') {
+			$target_lang_select = sprintf(
+				'<label style="display: block" for="xliff_export_target_lang_code">%s</label>
+				<select id="xliff_export_target_lang_code" name="xliff_export_target_lang_code">%s</select>',
+				__('Target language', 'rrze-xliff'),
+				$target_lang_select
+			);
+		}
         printf(
             '<div class="components-modal__screen-overlay rrze-xliff-export-modal-wrapper" style="display: none">
                 <div>
@@ -115,11 +171,12 @@ class Main
                                         <svg aria-hidden="true" role="img" focusable="false" class="dashicon dashicons-no-alt" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><path d="M14.95 6.46L11.41 10l3.54 3.54-1.41 1.41L10 11.42l-3.53 3.53-1.42-1.42L8.58 10 5.05 6.47l1.42-1.42L10 8.58l3.54-3.53z"></path></svg>
                                     </button>
                                 </div>
-                                <p><a href="%s" class="button">%s</a></p>
+                                <p><a href="%s" class="button xliff-export-download-link">%s</a></p>
                                 <p><strong>%s</strong></p>
                                 <p>
                                     <label style="display: block" for="xliff_export_email_address">%s</label>
-                                    <input type="email" value="%s" id="xliff_export_email_address" name="xliff_export_email_address">
+									<input type="email" value="%s" id="xliff_export_email_address" name="xliff_export_email_address">
+									%s
                                     <label style="display: block" for="xliff_export_email_note">%s</label>
                                     <textarea name="xliff_export_email_note" id="xliff_export_email_note" style="width: 100%%;"></textarea>
                                 </p>
@@ -138,7 +195,8 @@ class Main
             __('Download XLIFF file', 'rrze-xliff'),
             __('Or send the file to an email address:', 'rrze-xliff'),
             __('Email address', 'rrze-xliff'),
-            Options::get_options()->rrze_xliff_export_email_address,
+			Options::get_options()->rrze_xliff_export_email_address,
+			Options::get_options()->rrze_xliff_export_xliff_version === '1' ? $target_lang_select : '',
             __('Email text', 'rrze-xliff'),
             __('Send XLIFF file', 'rrze-xliff')
         );

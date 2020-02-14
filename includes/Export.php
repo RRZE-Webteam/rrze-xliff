@@ -182,6 +182,25 @@ class Export
      */
     protected function get_xliff_file($post_id)
     {
+		// Prüfen, welche XLIFF-Version gewünscht ist.
+		if (Options::get_options()->rrze_xliff_export_xliff_version !== '1') {
+			$file = $this->get_xliff_2_file($post_id);
+		} else {
+			$file = $this->get_xliff_1_file($post_id);
+		}
+
+		return $file;
+	}
+	
+	/**
+     * XLIFF-2-Markup genieren und dem Array hinzufügen.
+	 * 
+	 * @param int $post_id Die ID des Beitrags, der exportiert werden soll.
+     * 
+     * @return string|\WP_Error Error bei Fehler, andernfalls Dateistring.
+     */
+    protected function get_xliff_2_file($post_id)
+    {
         $export_post = get_post($post_id, OBJECT);
         if ($export_post === null) {
             return new \WP_Error('no_post', __('The submitted ID for export does not match a post', 'rrze-xliff'));
@@ -395,5 +414,144 @@ class Export
         }
 
         return $elements;
-    }
+	}
+
+	/**
+     * XLIFF-1-Markup genieren und dem Array hinzufügen.
+	 * 
+	 * @see https://github.com/RRZE-Webteam/cms-workflow/blob/master/modules/translation/xliff-download.php
+	 * 
+	 * @param int $post_id Die ID des Beitrags, der exportiert werden soll.
+     * 
+     * @return string|\WP_Error Error bei Fehler, andernfalls Dateistring.
+     */
+	function get_xliff_1_file($post_id)
+	{
+		$post = get_post($post_id, OBJECT);
+        if ($post === null) {
+            return new \WP_Error('no_post', __('The submitted ID for export does not match a post', 'rrze-xliff'));
+		}
+		
+		$source_language_code = \get_bloginfo('language');
+
+        if ($source_language_code == '') {
+            return new \WP_Error('no_source_lang_code', __('No source language code set.', 'rrze-xliff'));
+        }
+		$source_language_code = substr($source_language_code, 0, 2);
+
+		$target_language_code = '';
+		if (isset($_GET['xliff_target_lang_code'])) {
+			$target_language_code = $_GET['xliff_target_lang_code'];
+		} elseif (isset($_POST['xliff_target_lang_code'])) {
+			$target_language_code = $_POST['xliff_target_lang_code'];
+		}
+		
+		$elements = array(
+			(object) array(
+				'field_type' => 'title',
+				'field_data' => $post->post_title,
+				'field_data_translated' => $post->post_title,
+			),
+			(object) array(
+				'field_type' => 'body',
+				'field_data' => $post->post_content,
+				'field_data_translated' => $post->post_content,
+			),
+			(object) array(
+				'field_type' => 'excerpt',
+				'field_data' => $post->post_excerpt,
+				'field_data_translated' => $post->post_excerpt,
+		));
+
+		$post_meta = get_post_meta($post_id);
+
+		foreach ($post_meta as $meta_key => $meta_value) {
+			if (strpos($meta_key, '_') === 0) {
+				continue;
+			}
+			
+			if (empty($meta_value)) {
+				continue;
+			}        
+			
+			$meta_value = array_map('maybe_unserialize', $meta_value);
+			$meta_value = $meta_value[0];
+			
+			if (empty($meta_value) || is_array($meta_value) || is_numeric($meta_value)) {
+				continue;
+			}
+					
+			$elements[] = (object) array(
+				'field_type' => '_meta_' . $meta_key,
+				'field_data' => $meta_value,
+				'field_data_translated' => $meta_value,            
+			);
+		}
+
+		$translation = (object) array(
+			'original' => sanitize_file_name(sprintf('%1$s-%2$s', $post->post_title, $post->ID)),
+			'source_language_code' => $source_language_code,
+			'target_language_code' => $target_language_code,
+			'elements' => $elements
+		);
+
+		$xliff_file = '<?xml version="1.0" encoding="utf-8" standalone="no"?>' . PHP_EOL;
+		$xliff_file .= '<!DOCTYPE xliff PUBLIC "-//XLIFF//DTD XLIFF//EN" "http://www.oasis-open.org/committees/xliff/documents/xliff.dtd">' . PHP_EOL;
+		$xliff_file .= '<xliff version="1.0">' . PHP_EOL;
+		$xliff_file .= '   <file original="' . $translation->original . '" source-language="' . $translation->source_language_code . '" target-language="' . $translation->target_language_code . '" datatype="plaintext">' . PHP_EOL;
+		$xliff_file .= '      <header></header>' . PHP_EOL;
+		$xliff_file .= '      <body>' . PHP_EOL;
+
+		foreach ($translation->elements as $element) {
+			$field_data = $element->field_data;
+			$field_data_translated = $element->field_data_translated;
+
+			if ($field_data != '') {
+				$field_data = str_replace(PHP_EOL, '<br class="xliff-newline" />', $field_data);
+				$field_data_translated = str_replace(PHP_EOL, '<br class="xliff-newline" />', $field_data_translated);
+				
+				$xliff_file .= '         <trans-unit resname="' . $element->field_type . '" restype="String" datatype="text|html" id="' . $element->field_type . '">' . PHP_EOL;
+				
+				$xliff_file .= '            <source><![CDATA[' . $field_data . ']]></source>' . PHP_EOL;
+				
+				$xliff_file .= '            <target><![CDATA[' . $field_data_translated . ']]></target>' . PHP_EOL;
+				
+				$xliff_file .= '         </trans-unit>' . PHP_EOL;
+			}
+		}
+
+		$xliff_file .= '      </body>' . PHP_EOL;
+		$xliff_file .= '   </file>' . PHP_EOL;
+		$xliff_file .= '</xliff>' . PHP_EOL;
+
+		if (is_multisite()) {
+            global $current_blog;
+            $domain = $current_blog->domain;
+            $path = $current_blog->path;
+            $blog_id = $current_blog->blog_id;
+        } else {
+            $site_url = \get_home_url();
+            $parsed_url = parse_url($site_url);
+            $domain = $parsed_url['host'];
+            $path = isset($parsed_url['path']) ? $parsed_url['path'] : '/';
+            $blog_id = 1;
+        }
+        
+        $filename = sanitize_file_name(sprintf(
+            '%s%s-%s-%s-%s.xliff',
+            $domain,
+            $path !== '/' ? "-$path" : '',
+            $blog_id,
+            $post_id,
+            date('Ymd')
+        ));
+
+        array_push($this->xliff_files, [
+            'filename' => $filename,
+            'file_content' => $xliff_file,
+            'post_id' => $post_id,
+        ]);
+
+		return $xliff_file;
+	}
 }

@@ -1,3 +1,4 @@
+// global rrzeXliffJavaScriptData
 /**
  * Funktionen für den Massenexport.
  */
@@ -7,7 +8,10 @@
     const postsFilterForm = document.querySelector('#posts-filter');
     if (postsFilterForm) {
         // Markup für die Optionen zusammenbauen.
-        let advancedOptionsDiv = document.createElement('div'),
+		let advancedOptionsDiv = document.createElement('div'),
+			targetLangWrapper = '',
+			targetLangSelect = '',
+			targetLangLabel = '',
             emailWrapper = document.createElement('div'),
             emailFieldWrapper = document.createElement('p'),
             emailField = document.createElement('input'),
@@ -22,7 +26,34 @@
             choiceEmail = document.createElement('input'),
             choiceEmailLabel = document.createElement('label');
             
-        advancedOptionsDiv.classList.add('xliff-bulk-export-options');
+		advancedOptionsDiv.classList.add('xliff-bulk-export-options');
+		
+		// Build target language select, if XLIFF 1.
+		if (rrzeXliffJavaScriptData.lang_codes.length > 0) {
+			targetLangWrapper = document.createElement('p');
+			targetLangSelect = document.createElement('select');
+			targetLangSelect.setAttribute('name', 'xliff_target_lang_code');
+			targetLangSelect.setAttribute('id', 'xliff_target_lang_code');
+			targetLangSelect.setAttribute('style', 'float: none; display: block; margin-top: 6px;')
+
+			for (let langCode of rrzeXliffJavaScriptData.lang_codes) {
+				let langCodeOption = document.createElement('option');
+				langCodeOption.setAttribute('value', langCode.value);
+				langCodeOption.appendChild(document.createTextNode(langCode.value));
+				if (rrzeXliffJavaScriptData.default_target_lang_code === langCode.value) {
+					langCodeOption.setAttribute('selected', 'selected');
+				}
+				targetLangSelect.appendChild(langCodeOption);
+			}
+			targetLangLabel = document.createElement('label');
+			targetLangLabel.setAttribute('for', 'xliff_target_lang_code');
+			targetLangLabel.append(document.createTextNode(rrzeXliffJavaScriptData.lang_code_label));
+
+			targetLangWrapper.append(targetLangLabel);
+			targetLangWrapper.append(targetLangSelect);
+			advancedOptionsDiv.append(targetLangWrapper);
+
+		}
 
         choiceDownload.setAttribute('type', 'radio');
         choiceDownload.setAttribute('checked', 'checked');
